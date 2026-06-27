@@ -1,0 +1,5 @@
+{
+  "elementId": "ELEMENT-5",
+  "using": "xpath",
+  "value": "//span[text()=\"Add to estimate\"]"
+}

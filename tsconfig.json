@@ -18,6 +18,6 @@
     "newLine": "lf",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "@wdio/mocha-framework", "webdriverio/async", "expect-webdriverio"]
+    "types": ["node", "@wdio/mocha-framework", "webdriverio", "expect-webdriverio"]
   }
 }
