@@ -1,32 +1,92 @@
-# Disclaimer
+# ATM JS Intermediate — Playwright TAF
 
-> This is an educational project.
-> Do not consider current solutions as the only correct ones and ready for use on a production project
+Educational test automation project for the Google Cloud pricing calculator, built with **Playwright** and the **Page Object Model**.
 
+## Tech stack
 
+| Tool | Purpose |
+|------|---------|
+| [Playwright Test](https://playwright.dev/) | Test runner and browser automation |
+| TypeScript | Typed page objects and specs |
+| Page Object Model | Maintainable UI abstractions |
 
-# ATM JS Intermediate Test Automation Framework
+## Prerequisites
 
-## Description
-This project is a WebdriverIO TypeScript test automation framework.
+- **Node.js 18+** (recommended: 20 or 22)
+- npm
 
-## Tech Stack
-- TypeScript
-- WebdriverIO
-- Mocha
-- Chai / Expect WebdriverIO
-- ChromeDriver
+## Setup
 
-## Installation
+```bash
 npm install
+npx playwright install chromium
+```
 
-## Run Tests
+Optional environment variables (`.env`):
+
+```env
+BASE_URL=https://cloud.google.com
+```
+
+## Running tests
+
+```bash
+# Run all tests (headless)
 npm test
 
-## Project Structure
-src/pages - page objects
-src/tests - test specs
-src/utils - reusable helpers
+# Run with visible browser
+npm run test:headed
 
-## Test Approach
-Tests are written using Page Object Model and reusable methods.
+# Interactive UI mode
+npm run test:ui
+
+# Open last HTML report
+npm run test:report
+```
+
+Run a specific suite:
+
+```bash
+npx playwright test tests/smoke
+npx playwright test tests/samples
+```
+
+## Project structure
+
+```
+src/pages/              # Page Object classes
+  BasePage.ts           # Shared navigation helper
+  CalculatorPage.ts     # Google Cloud calculator page
+
+tests/
+  fixtures/             # Playwright test fixtures
+  samples/              # Introductory Playwright examples
+  smoke/                # Smoke and regression tests
+
+playwright.config.ts    # Playwright configuration
+```
+
+## Page Object pattern
+
+Page objects receive a Playwright `Page` instance and expose locators and actions:
+
+```typescript
+const calculatorPage = new CalculatorPage(page);
+await calculatorPage.open();
+await calculatorPage.dismissCookieBanner();
+await calculatorPage.addComputeEngineEstimate();
+```
+
+Locators use Playwright's recommended selectors (`getByRole`, `getByLabel`, `getByText`) with auto-waiting built in.
+
+## Configuration highlights
+
+- **Base URL**: `https://cloud.google.com` (overridable via `BASE_URL`)
+- **Parallel execution**: enabled via `fullyParallel`
+- **Reporter**: `list` (essential console output only)
+- **Artifacts**: screenshots on failure, traces on retry
+
+## Disclaimer
+
+> This is an educational project.  
+> Do not consider current solutions as the only correct ones or ready for production use.

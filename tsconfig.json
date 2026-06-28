@@ -1,23 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2022",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["es6", "dom"],
-    "allowJs": false,
+    "lib": ["ES2022"],
     "strict": true,
-    "allowUnreachableCode": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUnusedParameters": true,
     "noUnusedLocals": true,
-    "resolveJsonModule": true,
+    "noUnusedParameters": true,
     "esModuleInterop": true,
-    "newLine": "lf",
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "@wdio/mocha-framework", "webdriverio", "expect-webdriverio"]
-  }
+    "newLine": "lf"
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "playwright.config.ts"]
 }
