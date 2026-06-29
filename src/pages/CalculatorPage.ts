@@ -1,6 +1,8 @@
 import { Locator, Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 
+const MONTHLY_COST_PATTERN = /\$\d+\.\d{2}/;
+
 export class CalculatorPage extends BasePage {
   constructor(page: Page) {
     super(page, '/products/calculator');
@@ -9,8 +11,8 @@ export class CalculatorPage extends BasePage {
   async dismissCookieBanner(): Promise<void> {
     const candidates = [
       this.page.getByRole('button', { name: 'Dismiss' }),
-      this.page.getByText('OK, got it'),
-      this.page.getByText('OK', { exact: true }),
+      this.page.getByRole('button', { name: 'OK, got it' }),
+      this.page.getByRole('button', { name: 'OK', exact: true }),
     ];
 
     for (const button of candidates) {
@@ -26,15 +28,15 @@ export class CalculatorPage extends BasePage {
   }
 
   addEstimationModalWindow(): Locator {
-    return this.page.getByLabel('Add to this estimate');
+    return this.page.getByRole('heading', { name: 'Add to this estimate' });
   }
 
   computeEngineOption(): Locator {
-    return this.page.getByRole('heading', { name: 'Compute Engine' });
+    return this.page.getByRole('heading', { name: 'Compute Engine', exact: true });
   }
 
   viewDetailsButton(): Locator {
-    return this.page.getByText('View details');
+    return this.page.getByRole('button', { name: 'View details' });
   }
 
   configurationBlock(): Locator {
@@ -42,11 +44,15 @@ export class CalculatorPage extends BasePage {
   }
 
   monthlyCost(): Locator {
-    return this.page.locator('.egBpsb .D0aEmf');
+    return this.page.getByText(MONTHLY_COST_PATTERN).first();
   }
 
   incrementInstancesButton(): Locator {
-    return this.page.locator('.QiFlid [aria-label="Increment"]');
+    return this.page
+      .locator('div')
+      .filter({ has: this.configurationBlock() })
+      .getByRole('button', { name: 'Increment' })
+      .first();
   }
 
   pageHeading(): Locator {
@@ -75,5 +81,10 @@ export class CalculatorPage extends BasePage {
     for (let i = 0; i < count; i++) {
       await incrementButton.click();
     }
+  }
+
+  async getMonthlyCostText(): Promise<string> {
+    const text = await this.monthlyCost().textContent();
+    return text?.trim() ?? '';
   }
 }
