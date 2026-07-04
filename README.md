@@ -62,7 +62,7 @@ tsconfig.json
 |-------------------|----------------------------------|
 | Node version      | Run `nvm use`                    |
 | Chrome mismatch   | Install a chromedriver version that matches your Chrome browser |
-| Cookie banner     | Handled in the test `before` hook |
+| Cookie banner     | Handled in the test `beforeEach` hook |
 
 ## Disclaimer
 
