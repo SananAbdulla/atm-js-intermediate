@@ -33,12 +33,6 @@ BASE_URL=https://cloud.google.com
 npm test
 ```
 
-Generate an Allure report after a test run:
-
-```bash
-npm run report:generate
-```
-
 ## Project structure
 
 ```

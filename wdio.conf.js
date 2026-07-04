@@ -39,14 +39,4 @@ exports.config = {
   async before() {
     await browser.setWindowSize(1280, 720);
   },
-
-  async afterTest(_test, _context, { error }) {
-    if (error) {
-      try {
-        await browser.takeScreenshot();
-      } catch {
-        return;
-      }
-    }
-  },
 };
