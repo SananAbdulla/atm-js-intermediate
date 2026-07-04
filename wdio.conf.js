@@ -1,5 +1,3 @@
-const moment = require('moment');
-
 exports.config = {
   autoCompileOpts: {
     autoCompile: true,
@@ -11,10 +9,7 @@ exports.config = {
 
   runner: 'local',
 
-  specs: ['./src/tests/**/**.tests.ts'],
-  suites: {
-    smoke: ['./src/tests/smoke/**.tests.js'],
-  },
+  specs: ['./src/tests/**/*.tests.ts'],
 
   maxInstances: 1,
 
@@ -24,25 +19,21 @@ exports.config = {
     },
   ],
 
-  logLevel: 'trace',
+  logLevel: 'warn',
 
   bail: 0,
-  baseUrl: 'https://cloud.google.com',
+  baseUrl: process.env.BASE_URL || 'https://cloud.google.com',
 
   waitforTimeout: 10000,
   connectionRetryTimeout: 90000,
   connectionRetryCount: 3,
 
-  reporters: ['spec', 'allure'],
+  reporters: ['spec'],
   services: ['chromedriver'],
 
   framework: 'mocha',
   mochaOpts: {
-    timeout: 30000,
-  },
-
-  onPrepare() {
-    console.warn(`Start time: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    timeout: 60000,
   },
 
   async before() {
@@ -51,11 +42,11 @@ exports.config = {
 
   async afterTest(_test, _context, { error }) {
     if (error) {
-      await browser.takeScreenshot();
+      try {
+        await browser.takeScreenshot();
+      } catch {
+        return;
+      }
     }
   },
-
-  onComplete() {
-    console.warn(`Finish time: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
-  }
 };

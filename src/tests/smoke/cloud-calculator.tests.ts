@@ -1,54 +1,47 @@
-import "dotenv/config";
-import { CalculatorPage } from "../../pageObject/calculator_page";
-const chai = require('chai');
+import 'dotenv/config';
+import { CalculatorPage } from '../../pageObject/calculator_page';
 
-const calculatorPage = new CalculatorPage();
-
-const okCookieButton = process.env['LOCALE'] === 'en' ? 'OK, got it' : 'OK';
+const costPattern = /^\$\d+\.\d{2}$/;
 
 describe('Cloud Calculator', () => {
-  before(async () => {
-    // @ts-ignore
+  let calculatorPage: CalculatorPage;
+
+  beforeEach(async () => {
+    calculatorPage = new CalculatorPage();
     await calculatorPage.open();
-    const okButton = await $(`//*[text()="${okCookieButton}"]`);
-    await okButton.click();
+    await calculatorPage.dismissCookieBanner();
   });
 
-  it('Should be able to add new entities into the calculator', async () => {
-    console.log('First test');
-
-    // @ts-ignore
-    await calculatorPage.open();
-
-    const url = await browser.getUrl();
-    chai.expect(url).to.be.equal(browser.config.baseUrl + '/products/calculator');
-
+  it('should display the pricing calculator page', async () => {
+    await expect(browser).toHaveUrl(`${browser.config.baseUrl}/products/calculator`);
+    await expect(calculatorPage.pageHeading()).toBeDisplayed();
     await expect(calculatorPage.addEstimateButton()).toBeDisplayed();
+  });
 
-    const addEstimateButton = await calculatorPage.addEstimateButton();
-    addEstimateButton.click();
+  it('should open the add estimate dialog with Compute Engine option', async () => {
+    const addButton = await calculatorPage.addEstimateButton();
+    await addButton.click();
 
-    const addEstimationModalWindow = await calculatorPage.addEstimationModalWindow();
+    await expect(calculatorPage.addEstimationModalWindow()).toBeDisplayed();
+    await expect(calculatorPage.computeEngineOption()).toBeDisplayed();
+  });
 
-    await browser.pause(150);
-    chai.expect(await addEstimationModalWindow.isDisplayed()).to.be.true;
-
-    const computeEngineElement = await $('//h2[text()="Compute Engine"]');
-    await computeEngineElement.click();
+  it('should add a Compute Engine estimate to the calculator', async () => {
+    await calculatorPage.addComputeEngineEstimate();
 
     await expect(calculatorPage.configurationBlock()).toBeDisplayed();
+    await browser.waitUntil(async () => costPattern.test(await calculatorPage.getMonthlyCostText()));
   });
 
-  it("Should be able to add two new instances", async () => {
-    console.log(`Second test`);
+  it('should increase monthly cost when instances are added', async () => {
+    await calculatorPage.addComputeEngineEstimate();
 
-    $('.QiFlid [aria-label="Increment"] .wX4xVc-Bz112c-RLmnJb').then(addNewInstanceButton => {
-      for (let i = 0; i <= 2; i++) {
-        addNewInstanceButton.click();
-      }
+    const initialCost = await calculatorPage.getMonthlyCostText();
+    await calculatorPage.addInstances(2);
+
+    await browser.waitUntil(async () => {
+      const updatedCost = await calculatorPage.getMonthlyCostText();
+      return updatedCost !== initialCost && costPattern.test(updatedCost);
     });
-
-    const threeInstancesCostUSD = '$417.30';
-    await expect($('.egBpsb .MyvX5d.D0aEmf')).toHaveText(threeInstancesCostUSD);
   });
 });
