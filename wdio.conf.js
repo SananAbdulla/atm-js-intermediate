@@ -1,12 +1,6 @@
-exports.config = {
-  autoCompileOpts: {
-    autoCompile: true,
-    tsNodeOpts: {
-      transpileOnly: true,
-      project: 'tsconfig.json',
-    },
-  },
+require('dotenv/config');
 
+exports.config = {
   runner: 'local',
 
   specs: ['./src/tests/**/*.tests.ts'],
@@ -29,7 +23,6 @@ exports.config = {
   connectionRetryCount: 3,
 
   reporters: ['spec'],
-  services: ['chromedriver'],
 
   framework: 'mocha',
   mochaOpts: {

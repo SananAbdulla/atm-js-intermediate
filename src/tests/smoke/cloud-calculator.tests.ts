@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { CalculatorPage } from '../../pageObject/calculator_page';
 
+const baseUrl = process.env.BASE_URL || 'https://cloud.google.com';
 const costPattern = /^\$\d+\.\d{2}$/;
 
 describe('Cloud Calculator', () => {
@@ -13,23 +14,23 @@ describe('Cloud Calculator', () => {
   });
 
   it('should display the pricing calculator page', async () => {
-    await expect(browser).toHaveUrl(`${browser.config.baseUrl}/products/calculator`);
-    await expect(calculatorPage.pageHeading()).toBeDisplayed();
-    await expect(calculatorPage.addEstimateButton()).toBeDisplayed();
+    await expect(browser).toHaveUrl(`${baseUrl}/products/calculator`);
+    await expect(await calculatorPage.pageHeading()).toBeDisplayed();
+    await expect(await calculatorPage.addEstimateButton()).toBeDisplayed();
   });
 
   it('should open the add estimate dialog with Compute Engine option', async () => {
     const addButton = await calculatorPage.addEstimateButton();
     await addButton.click();
 
-    await expect(calculatorPage.addEstimationModalWindow()).toBeDisplayed();
-    await expect(calculatorPage.computeEngineOption()).toBeDisplayed();
+    await expect(await calculatorPage.addEstimationModalWindow()).toBeDisplayed();
+    await expect(await calculatorPage.computeEngineOption()).toBeDisplayed();
   });
 
   it('should add a Compute Engine estimate to the calculator', async () => {
     await calculatorPage.addComputeEngineEstimate();
 
-    await expect(calculatorPage.configurationBlock()).toBeDisplayed();
+    await expect(await calculatorPage.configurationBlock()).toBeDisplayed();
     await browser.waitUntil(async () => costPattern.test(await calculatorPage.getMonthlyCostText()));
   });
 
