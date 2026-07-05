@@ -72,7 +72,11 @@ export class CalculatorPage extends BasePage {
     await this.addEstimationModalWindow().waitFor({ state: 'visible' });
     await this.computeEngineOption().click();
 
-    if (await this.viewDetailsButton().isVisible().catch(() => false)) {
+    if (
+      await this.viewDetailsButton()
+        .isVisible()
+        .catch(() => false)
+    ) {
       await this.viewDetailsButton().click();
     }
 

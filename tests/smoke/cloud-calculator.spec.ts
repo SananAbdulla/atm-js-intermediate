@@ -7,7 +7,9 @@ test.describe('Cloud Calculator', () => {
     await expect(calculatorPage.addEstimateButton()).toBeVisible();
   });
 
-  test('should open the add estimate dialog with Compute Engine option', async ({ calculatorPage }) => {
+  test('should open the add estimate dialog with Compute Engine option', async ({
+    calculatorPage,
+  }) => {
     await calculatorPage.addEstimateButton().click();
 
     await expect(calculatorPage.addEstimationModalWindow()).toBeVisible();
@@ -33,10 +35,11 @@ test.describe('Cloud Calculator', () => {
   test('should increase monthly cost when instances are added', async ({ calculatorPage }) => {
     await calculatorPage.addComputeEngineEstimate();
 
+    await expect(calculatorPage.monthlyCost()).toHaveText(/\$\d+\.\d{2}/);
     const initialCost = await calculatorPage.getMonthlyCostText();
     await calculatorPage.addInstances(2);
 
-    await expect(calculatorPage.monthlyCost()).not.toHaveText(initialCost);
+    await expect.poll(async () => calculatorPage.getMonthlyCostText()).not.toBe(initialCost);
     await expect(calculatorPage.monthlyCost()).toHaveText(/\$\d+\.\d{2}/);
   });
 
