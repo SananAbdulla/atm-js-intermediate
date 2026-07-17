@@ -1,13 +1,11 @@
 import 'dotenv/config';
-import { CalculatorPage } from '../../pageObject/calculator_page';
+import { CalculatorPage } from '../../pageObject/CalculatorPage';
 
+const calculatorPage = new CalculatorPage();
 const costPattern = /^\$\d+\.\d{2}$/;
 
 describe('Cloud Calculator', () => {
-  let calculatorPage: CalculatorPage;
-
   beforeEach(async () => {
-    calculatorPage = new CalculatorPage();
     await calculatorPage.open();
     await calculatorPage.dismissCookieBanner();
   });

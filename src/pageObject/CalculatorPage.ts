@@ -17,54 +17,57 @@ export class CalculatorPage extends BasePage {
     }
   }
 
-  async addEstimateButton(): Promise<WebdriverIO.Element> {
+  addEstimateButton() {
     return $('//button[.//span[normalize-space()="Add to estimate"]]');
   }
 
-  async addEstimationModalWindow(): Promise<WebdriverIO.Element> {
+  addEstimationModalWindow() {
     return $('[aria-label="Add to this estimate"]');
   }
 
-  async computeEngineOption(): Promise<WebdriverIO.Element> {
+  computeEngineOption() {
     return $('//h2[normalize-space()="Compute Engine"]');
   }
 
-  async configurationBlock(): Promise<WebdriverIO.Element> {
+  configurationBlock() {
     return $('h2*=Instances configuration');
   }
 
-  async monthlyCost(): Promise<WebdriverIO.Element> {
+  monthlyCost() {
     return $('.egBpsb .D0aEmf');
   }
 
-  async incrementInstancesButton(): Promise<WebdriverIO.Element> {
-    const buttons = await $$('[aria-label="Increment"]');
-    return buttons[0]!;
+  incrementInstancesButton() {
+    return $(
+      '//h2[contains(., "Instances configuration")]/ancestor::div[.//button[@aria-label="Increment"]]//button[@aria-label="Increment"]',
+    );
   }
 
-  async pageHeading(): Promise<WebdriverIO.Element> {
+  pageHeading() {
     return $('h1*=pricing calculator');
+  }
+
+  viewDetailsButton() {
+    return $('button=View details');
   }
 
   async addComputeEngineEstimate(): Promise<void> {
     const addButton = await this.addEstimateButton();
-    await addButton.waitForClickable();
+    await addButton.waitForClickable({ timeout: 10000 });
     await addButton.click();
 
-    const modal = await this.addEstimationModalWindow();
-    await modal.waitForDisplayed();
+    await (await this.addEstimationModalWindow()).waitForDisplayed();
 
     const computeEngine = await this.computeEngineOption();
-    await computeEngine.waitForClickable();
+    await computeEngine.waitForClickable({ timeout: 10000 });
     await computeEngine.click();
 
-    const viewDetails = await $('button=View details');
+    const viewDetails = await this.viewDetailsButton();
     if (await viewDetails.isDisplayed().catch(() => false)) {
       await viewDetails.click();
     }
 
-    const config = await this.configurationBlock();
-    await config.waitForDisplayed({ timeout: 15000 });
+    await (await this.configurationBlock()).waitForDisplayed({ timeout: 15000 });
   }
 
   async addInstances(count: number): Promise<void> {
@@ -73,7 +76,7 @@ export class CalculatorPage extends BasePage {
     await incrementButton.scrollIntoView();
 
     for (let i = 0; i < count; i++) {
-      await browser.execute('arguments[0].click();', incrementButton);
+      await incrementButton.click();
     }
   }
 

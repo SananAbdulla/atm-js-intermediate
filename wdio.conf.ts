@@ -1,4 +1,6 @@
-exports.config = {
+import 'dotenv/config';
+
+export const config = {
   autoCompileOpts: {
     autoCompile: true,
     tsNodeOpts: {
@@ -7,7 +9,7 @@ exports.config = {
     },
   },
 
-  runner: 'local',
+  runner: 'local' as const,
 
   specs: ['./src/tests/**/*.tests.ts'],
 
@@ -19,7 +21,7 @@ exports.config = {
     },
   ],
 
-  logLevel: 'warn',
+  logLevel: 'warn' as const,
 
   bail: 0,
   baseUrl: process.env.BASE_URL || 'https://cloud.google.com',
