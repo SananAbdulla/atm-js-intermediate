@@ -4,7 +4,7 @@
   "description": "Automated Testing Mentoring with JS: Intermediate",
   "private": true,
   "scripts": {
-    "test": "wdio run wdio.conf.js"
+    "test": "wdio run wdio.conf.ts"
   },
   "license": "EPAM Systems",
   "engines": {

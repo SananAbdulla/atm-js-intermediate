@@ -17,5 +17,5 @@
     "newLine": "lf",
     "types": ["node", "@wdio/globals/types", "@wdio/mocha-framework", "expect-webdriverio"]
   },
-  "include": ["src/**/*.ts", "wdio.conf.js"]
+  "include": ["src/**/*.ts", "wdio.conf.ts"]
 }

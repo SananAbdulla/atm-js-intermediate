@@ -39,12 +39,12 @@ npm test
 src/
   pageObject/
     BasePage.ts
-    calculator_page.ts
+    CalculatorPage.ts
   tests/
     smoke/
-      cloud-calculator.tests.ts
+      CloudCalculator.tests.ts
 
-wdio.conf.js
+wdio.conf.ts
 tsconfig.json
 ```
 
@@ -58,10 +58,11 @@ tsconfig.json
 
 ## Troubleshooting
 
-| Problem       | Fix                    |
-|---------------|------------------------|
-| Node version  | Run `nvm use`          |
-| Cookie banner | Handled in `beforeEach` |
+| Problem           | Fix                              |
+|-------------------|----------------------------------|
+| Node version      | Run `nvm use`                    |
+| Chrome mismatch   | Install a chromedriver version that matches your Chrome browser |
+| Cookie banner     | Handled in the test `beforeEach` hook (same page object instance) |
 
 ## Disclaimer
 
