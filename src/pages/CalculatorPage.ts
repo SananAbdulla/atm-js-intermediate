@@ -3,7 +3,7 @@ import { BasePage } from './BasePage';
 
 export class CalculatorPage extends BasePage {
   constructor(page: Page) {
-    super(page, '/products/calculator');
+    super(page, '/products/calculator?hl=en');
   }
 
   cookieAcceptButton(): Locator {
@@ -65,6 +65,24 @@ export class CalculatorPage extends BasePage {
     return this.page.getByRole('heading', {
       name: /Welcome to Google Cloud.*pricing calculator/i,
     });
+  }
+
+  getStartedSection(): Locator {
+    return this.page
+      .getByRole('heading', { name: 'Get started with your estimate' })
+      .locator('xpath=ancestor::div[1]');
+  }
+
+  serviceSelectionPanel(): Locator {
+    return this.page
+      .getByRole('heading', { name: 'Add to this estimate' })
+      .locator('xpath=ancestor::div[.//h2[normalize-space()="Compute Engine"]][1]');
+  }
+
+  instancesConfigurationPanel(): Locator {
+    return this.page
+      .getByRole('heading', { name: /Instances configuration/i })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]');
   }
 
   async openAddEstimateDialog(): Promise<void> {
