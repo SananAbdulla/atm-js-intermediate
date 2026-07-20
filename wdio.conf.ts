@@ -1,14 +1,6 @@
 import 'dotenv/config';
 
 export const config = {
-  autoCompileOpts: {
-    autoCompile: true,
-    tsNodeOpts: {
-      transpileOnly: true,
-      project: 'tsconfig.json',
-    },
-  },
-
   runner: 'local' as const,
 
   specs: ['./src/tests/**/*.tests.ts'],
@@ -31,7 +23,6 @@ export const config = {
   connectionRetryCount: 3,
 
   reporters: ['spec'],
-  services: ['chromedriver'],
 
   framework: 'mocha',
   mochaOpts: {

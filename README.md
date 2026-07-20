@@ -6,13 +6,13 @@ Built with WebdriverIO, TypeScript, Mocha, and the Page Object Model.
 
 ## Prerequisites
 
-- Node.js 14+ (see `.nvmrc`)
+- Node.js 18+ (see `.nvmrc`)
 - npm
 - Google Chrome
 
 ```bash
 node -v
-nvm use   # if you use nvm
+nvm use
 ```
 
 ## Setup
@@ -53,7 +53,7 @@ tsconfig.json
 | Setting  | Value                                      |
 |----------|--------------------------------------------|
 | Base URL | `https://cloud.google.com` (`BASE_URL` env) |
-| Browser  | Chrome via chromedriver                      |
+| Browser  | Chrome (driver managed by WebdriverIO)     |
 | Reporter | `spec`                                     |
 
 ## Troubleshooting

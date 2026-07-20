@@ -1,24 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2022",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["es6", "dom"],
-    "allowJs": false,
+    "lib": ["ES2022", "dom"],
     "strict": true,
-    "allowUnreachableCode": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "noPropertyAccessFromIndexSignature": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "newLine": "lf",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "@wdio/mocha-framework", "webdriverio/async", "expect-webdriverio"]
+    "newLine": "lf",
+    "types": ["node", "@wdio/globals/types", "@wdio/mocha-framework", "expect-webdriverio"]
   },
   "include": ["src/**/*.ts", "wdio.conf.ts"]
 }

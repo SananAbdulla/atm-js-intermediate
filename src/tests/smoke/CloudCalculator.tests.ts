@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { CalculatorPage } from '../../pageObject/CalculatorPage';
 
 const calculatorPage = new CalculatorPage();
+const baseUrl = process.env.BASE_URL || 'https://cloud.google.com';
 
 describe('Cloud Calculator', () => {
   beforeEach(async () => {
@@ -10,7 +11,7 @@ describe('Cloud Calculator', () => {
   });
 
   it('should display the pricing calculator page', async () => {
-    await expect(browser).toHaveUrl(`${browser.config.baseUrl}/products/calculator`);
+    await expect(browser).toHaveUrl(`${baseUrl}/products/calculator`);
     await expect(calculatorPage.pageHeading()).toBeDisplayed();
     await expect(calculatorPage.addEstimateButton()).toBeDisplayed();
   });
