@@ -50,38 +50,46 @@ export class CalculatorPage extends BasePage {
     return $('button=View details');
   }
 
-  async addComputeEngineEstimate(): Promise<void> {
+  async openAddEstimateDialog(): Promise<void> {
     const addButton = await this.addEstimateButton();
-    await addButton.waitForClickable({ timeout: 10000 });
+    await addButton.waitForClickable({ timeout: browser.options.waitforTimeout });
     await addButton.click();
+    await (await this.addEstimationModalWindow()).waitForDisplayed({
+      timeout: browser.options.waitforTimeout,
+    });
+  }
 
-    await (await this.addEstimationModalWindow()).waitForDisplayed();
-
+  async selectComputeEngine(): Promise<void> {
     const computeEngine = await this.computeEngineOption();
-    await computeEngine.waitForClickable({ timeout: 10000 });
+    await computeEngine.waitForClickable({ timeout: browser.options.waitforTimeout });
     await computeEngine.click();
+  }
 
+  async openInstanceConfiguration(): Promise<void> {
     const viewDetails = await this.viewDetailsButton();
-    if (await viewDetails.isDisplayed().catch(() => false)) {
-      await viewDetails.click();
-    }
+    await viewDetails.waitForClickable({ timeout: browser.options.waitforTimeout });
+    await viewDetails.click();
+    await (await this.configurationBlock()).waitForDisplayed({
+      timeout: browser.options.waitforTimeout,
+    });
+  }
 
-    await (await this.configurationBlock()).waitForDisplayed({ timeout: 15000 });
+  async addComputeEngineEstimate(): Promise<void> {
+    await this.openAddEstimateDialog();
+    await this.selectComputeEngine();
+    await (await this.configurationBlock()).waitForDisplayed({
+      timeout: browser.options.waitforTimeout,
+    });
   }
 
   async addInstances(count: number): Promise<void> {
     const incrementButton = await this.incrementInstancesButton();
-    await incrementButton.waitForDisplayed();
-    await incrementButton.scrollIntoView();
+    await incrementButton.waitForDisplayed({ timeout: browser.options.waitforTimeout });
 
     for (let i = 0; i < count; i++) {
+      await incrementButton.scrollIntoView({ block: 'center', inline: 'nearest' });
+      await incrementButton.waitForClickable({ timeout: browser.options.waitforTimeout });
       await incrementButton.click();
     }
-  }
-
-  async getMonthlyCostText(): Promise<string> {
-    const cost = await this.monthlyCost();
-    await cost.waitForDisplayed();
-    return (await cost.getText()).trim();
   }
 }

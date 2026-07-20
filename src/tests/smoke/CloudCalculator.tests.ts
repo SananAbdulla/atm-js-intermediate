@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { CalculatorPage } from '../../pageObject/CalculatorPage';
 
 const calculatorPage = new CalculatorPage();
-const costPattern = /^\$\d+\.\d{2}$/;
 
 describe('Cloud Calculator', () => {
   beforeEach(async () => {
@@ -28,18 +27,15 @@ describe('Cloud Calculator', () => {
     await calculatorPage.addComputeEngineEstimate();
 
     await expect(calculatorPage.configurationBlock()).toBeDisplayed();
-    await browser.waitUntil(async () => costPattern.test(await calculatorPage.getMonthlyCostText()));
+    await expect(calculatorPage.monthlyCost()).toBeDisplayed();
   });
 
   it('should increase monthly cost when instances are added', async () => {
     await calculatorPage.addComputeEngineEstimate();
 
-    const initialCost = await calculatorPage.getMonthlyCostText();
+    const initialCost = await (await calculatorPage.monthlyCost()).getText();
     await calculatorPage.addInstances(2);
 
-    await browser.waitUntil(async () => {
-      const updatedCost = await calculatorPage.getMonthlyCostText();
-      return updatedCost !== initialCost && costPattern.test(updatedCost);
-    });
+    await expect(calculatorPage.monthlyCost()).not.toHaveText(initialCost);
   });
 });

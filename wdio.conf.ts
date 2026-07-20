@@ -39,6 +39,6 @@ export const config = {
   },
 
   async before() {
-    await browser.setWindowSize(1280, 720);
+    await browser.setWindowSize(1280, 900);
   },
 };
