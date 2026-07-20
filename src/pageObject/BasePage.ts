@@ -1,8 +1,7 @@
 export class BasePage {
-  constructor(private readonly url: any) {}
+  constructor(private readonly path: string) {}
 
-  // @ts-ignore
-  open(url: any) {
-    return browser.url(this.url);
+  async open(): Promise<void> {
+    await browser.url(this.path);
   }
 }
