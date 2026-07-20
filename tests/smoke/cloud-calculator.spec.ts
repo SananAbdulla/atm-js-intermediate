@@ -8,17 +8,17 @@ test.describe('Cloud Calculator', () => {
   });
 
   test('should open the add estimate dialog with Compute Engine option', async ({ calculatorPage }) => {
-    await calculatorPage.addEstimateButton().click();
+    await calculatorPage.openAddEstimateDialog();
 
     await expect(calculatorPage.addEstimationModalWindow()).toBeVisible();
     await expect(calculatorPage.computeEngineOption()).toBeVisible();
   });
 
   test('should close the add estimate dialog when pressing Escape', async ({ calculatorPage }) => {
-    await calculatorPage.addEstimateButton().click();
+    await calculatorPage.openAddEstimateDialog();
     await expect(calculatorPage.addEstimationModalWindow()).toBeVisible();
 
-    await calculatorPage.page.keyboard.press('Escape');
+    await calculatorPage.closeAddEstimateDialog();
 
     await expect(calculatorPage.addEstimationModalWindow()).toBeHidden();
   });

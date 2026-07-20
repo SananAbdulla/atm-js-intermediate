@@ -6,23 +6,22 @@ export class CalculatorPage extends BasePage {
     super(page, '/products/calculator');
   }
 
-  async dismissCookieBanner(): Promise<void> {
-    const candidates = [
-      this.page.getByRole('button', { name: 'Dismiss' }),
-      this.page.getByRole('button', { name: 'OK, got it' }),
-      this.page.getByRole('button', { name: 'OK', exact: true }),
-    ];
+  cookieAcceptButton(): Locator {
+    return this.page.getByRole('button', { name: 'OK, got it' });
+  }
 
-    for (const button of candidates) {
-      if (await button.isVisible().catch(() => false)) {
-        await button.click();
-        return;
-      }
+  async dismissCookieBanner(): Promise<void> {
+    const acceptButton = this.cookieAcceptButton();
+    if (await acceptButton.isVisible()) {
+      await acceptButton.click();
     }
   }
 
   addEstimateButton(): Locator {
-    return this.page.getByRole('button', { name: 'Add to estimate' }).first();
+    return this.page
+      .getByRole('heading', { name: 'Get started with your estimate' })
+      .locator('xpath=ancestor::div[1]')
+      .getByRole('button', { name: 'Add to estimate' });
   }
 
   addEstimationModalWindow(): Locator {
@@ -42,23 +41,24 @@ export class CalculatorPage extends BasePage {
   }
 
   monthlyCost(): Locator {
-    return this.page.locator('.egBpsb .D0aEmf');
+    return this.page
+      .getByText(/Estimated cost/)
+      .locator('xpath=ancestor::*[contains(normalize-space(.), "/ mo")][1]')
+      .getByText(/^\$\d+\.\d{2}$/);
   }
 
   incrementInstancesButton(): Locator {
     return this.page
-      .locator('div')
-      .filter({ has: this.configurationBlock() })
-      .getByRole('button', { name: 'Increment' })
-      .first();
+      .getByText('Number of instances*', { exact: true })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]')
+      .getByRole('button', { name: 'Increment' });
   }
 
   decrementInstancesButton(): Locator {
     return this.page
-      .locator('div')
-      .filter({ has: this.configurationBlock() })
-      .getByRole('button', { name: 'Decrement' })
-      .first();
+      .getByText('Number of instances*', { exact: true })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Decrement"]][1]')
+      .getByRole('button', { name: 'Decrement' });
   }
 
   pageHeading(): Locator {
@@ -67,15 +67,28 @@ export class CalculatorPage extends BasePage {
     });
   }
 
-  async addComputeEngineEstimate(): Promise<void> {
+  async openAddEstimateDialog(): Promise<void> {
     await this.addEstimateButton().click();
     await this.addEstimationModalWindow().waitFor({ state: 'visible' });
+  }
+
+  async selectComputeEngine(): Promise<void> {
     await this.computeEngineOption().click();
+  }
 
-    if (await this.viewDetailsButton().isVisible().catch(() => false)) {
-      await this.viewDetailsButton().click();
-    }
+  async openInstanceConfiguration(): Promise<void> {
+    await this.viewDetailsButton().click();
+    await this.configurationBlock().waitFor({ state: 'visible' });
+  }
 
+  async closeAddEstimateDialog(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+    await this.addEstimationModalWindow().waitFor({ state: 'hidden' });
+  }
+
+  async addComputeEngineEstimate(): Promise<void> {
+    await this.openAddEstimateDialog();
+    await this.selectComputeEngine();
     await this.configurationBlock().waitFor({ state: 'visible' });
   }
 
