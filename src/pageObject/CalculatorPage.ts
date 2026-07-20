@@ -5,15 +5,14 @@ export class CalculatorPage extends BasePage {
     super('/products/calculator');
   }
 
-  async dismissCookieBanner(): Promise<void> {
-    const selectors = ['button=Dismiss', 'button=OK, got it', 'button=OK'];
+  cookieAcceptButton() {
+    return $('button=OK, got it');
+  }
 
-    for (const selector of selectors) {
-      const button = await $(selector);
-      if (await button.isDisplayed().catch(() => false)) {
-        await button.click();
-        return;
-      }
+  async dismissCookieBanner(): Promise<void> {
+    const acceptButton = await this.cookieAcceptButton();
+    if (await acceptButton.isDisplayed().catch(() => false)) {
+      await acceptButton.click();
     }
   }
 
