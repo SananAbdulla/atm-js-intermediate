@@ -2,13 +2,12 @@
 
 Smoke tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator).
 
-Built with WebdriverIO, TypeScript, Mocha, and the Page Object Model.
+Built with Playwright, TypeScript, and the Page Object Model.
 
 ## Prerequisites
 
 - Node.js 18+ (see `.nvmrc`)
-- npm
-- Google Chrome
+- npm 9+
 
 ```bash
 node -v
@@ -19,6 +18,7 @@ nvm use
 
 ```bash
 npm install
+npx playwright install chromium
 ```
 
 Optional `.env` file to override the base URL:
@@ -31,38 +31,51 @@ BASE_URL=https://cloud.google.com
 
 ```bash
 npm test
+npm run test:headed
+npm run test:ui
+npm run test:report
+```
+
+Run a single suite:
+
+```bash
+npx playwright test tests/smoke
 ```
 
 ## Project structure
 
 ```
-src/
-  pageObject/
-    BasePage.ts
-    CalculatorPage.ts
-  tests/
-    smoke/
-      CloudCalculator.tests.ts
+src/pages/
+  BasePage.ts
+  CalculatorPage.ts
 
-wdio.conf.ts
+tests/
+  fixtures/
+    calculator.fixture.ts
+  smoke/
+    cloud-calculator.spec.ts
+
+playwright.config.ts
 tsconfig.json
 ```
 
 ## Configuration
 
-| Setting  | Value                                      |
-|----------|--------------------------------------------|
-| Base URL | `https://cloud.google.com` (`BASE_URL` env) |
-| Browser  | Chrome (driver managed by WebdriverIO)     |
-| Reporter | `spec`                                     |
+| Setting      | Value                                      |
+|--------------|--------------------------------------------|
+| Base URL     | `https://cloud.google.com` (`BASE_URL` env) |
+| Browser      | Chromium                                   |
+| Parallelism  | Enabled (`fullyParallel`)                  |
+| Reporter     | `line`                                     |
+| Retries      | 1 in CI, 0 locally                         |
 
 ## Troubleshooting
 
-| Problem           | Fix                              |
-|-------------------|----------------------------------|
-| Node version      | Run `nvm use`                    |
-| Chrome mismatch   | Install a chromedriver version that matches your Chrome browser |
-| Cookie banner     | Handled in the test `beforeEach` hook (same page object instance) |
+| Problem          | Fix                                      |
+|------------------|------------------------------------------|
+| Node version     | Run `nvm use`                            |
+| Browser not found| Run `npx playwright install chromium`    |
+| Cookie banner    | Handled in the calculator fixture        |
 
 ## Disclaimer
 
