@@ -114,4 +114,62 @@ export class CalculatorPage extends BasePage {
     const text = await this.monthlyCost().textContent();
     return text?.trim() ?? '';
   }
+
+  parseMonthlyCost(costText: string): number {
+    const match = costText.match(/\$([\d,]+\.\d{2})/);
+    return match ? parseFloat(match[1].replace(',', '')) : NaN;
+  }
+
+  private async selectComboboxOption(
+    comboboxName: string,
+    optionMatcher: RegExp | string,
+  ): Promise<void> {
+    await this.page.getByRole('combobox', { name: comboboxName }).click();
+    const option =
+      typeof optionMatcher === 'string'
+        ? this.page.getByRole('option', { name: optionMatcher })
+        : this.page.getByRole('option').filter({ hasText: optionMatcher }).first();
+    await option.click();
+  }
+
+  async selectSeries(series: string): Promise<void> {
+    await this.selectComboboxOption('Series', new RegExp(`^${series}`));
+  }
+
+  async selectMachineType(machineType: string): Promise<void> {
+    await this.page.getByRole('combobox', { name: 'Machine type' }).click();
+    await this.page.locator(`[role="option"][data-value="${machineType}"]`).click();
+  }
+
+  async selectOperatingSystem(operatingSystem: RegExp | string): Promise<void> {
+    await this.selectComboboxOption('Operating System / Software', operatingSystem);
+  }
+
+  async selectRegion(region: RegExp | string): Promise<void> {
+    await this.selectComboboxOption('Region', region);
+  }
+
+  async setBootDiskSize(gib: number): Promise<void> {
+    await this.page.getByRole('spinbutton', { name: /Boot disk size/ }).fill(String(gib));
+  }
+
+  async setInstanceCount(count: number): Promise<void> {
+    await this.page.getByRole('spinbutton', { name: /Number of instances/ }).fill(String(count));
+  }
+
+  async configureStandardComputeEngine(options: {
+    series: string;
+    machineType: string;
+    operatingSystem: RegExp | string;
+    region: RegExp | string;
+    bootDiskSizeGiB: number;
+    instanceCount: number;
+  }): Promise<void> {
+    await this.selectSeries(options.series);
+    await this.selectMachineType(options.machineType);
+    await this.selectOperatingSystem(options.operatingSystem);
+    await this.selectRegion(options.region);
+    await this.setBootDiskSize(options.bootDiskSizeGiB);
+    await this.setInstanceCount(options.instanceCount);
+  }
 }
