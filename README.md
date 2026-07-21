@@ -2,6 +2,8 @@
 
 Smoke tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator).
 
+AI-assisted tests for the [Desmos graphing calculator](https://www.desmos.com/calculator).
+
 Built with Playwright, TypeScript, and the Page Object Model.
 
 ## Prerequisites
@@ -26,6 +28,7 @@ Configure `.env` for optional overrides:
 
 ```env
 BASE_URL=https://cloud.google.com
+DESMOS_BASE_URL=https://www.desmos.com
 RP_API_KEY=your_report_portal_token
 RP_ENDPOINT=https://reportportal.epam.com/api/v1
 RP_PROJECT=your_personal_project
@@ -36,6 +39,7 @@ RP_LAUNCH=ATM Playwright Tests
 
 ```bash
 npm test
+npm run test:ai
 npm run test:headed
 npm run test:ui
 npm run test:report
@@ -45,7 +49,19 @@ Run a single suite:
 
 ```bash
 npx playwright test tests/smoke
+npx playwright test tests/ai
 ```
+
+## AI-powered testing (Desmos)
+
+Natural-language prompts and workflow notes live under `docs/ai/`.
+
+| Command | Scope |
+|---------|-------|
+| `npm run test:ai` | Desmos AI-designed scenarios |
+| `npm test` | Full suite (Google Cloud smoke + Desmos) |
+
+See `docs/ai/WORKFLOW.md` for investigation notes, prompts, and proof artifacts.
 
 ## Linting and formatting
 
@@ -75,12 +91,21 @@ Failed tests retain trace, screenshot, and video. Report artifacts are gitignore
 src/pages/
   BasePage.ts
   CalculatorPage.ts
+  DesmosCalculatorPage.ts
 
 tests/
   fixtures/
     calculator.fixture.ts
+    desmos.fixture.ts
   smoke/
     cloud-calculator.spec.ts
+  ai/
+    desmos-graph-equation.spec.ts
+
+docs/ai/
+  WORKFLOW.md
+  prompts/
+  proofs/
 
 playwright.config.ts
 eslint.config.mjs
