@@ -1,6 +1,6 @@
 # ATM JS Intermediate — Test Automation Framework
 
-Smoke tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator).
+Smoke and visual tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator?hl=en).
 
 Built with Playwright, TypeScript, and the Page Object Model.
 
@@ -36,15 +36,15 @@ RP_LAUNCH=ATM Playwright Tests
 
 ```bash
 npm test
-npm run test:headed
-npm run test:ui
+npm run test:visual
+npm run test:visual:update
 npm run test:report
 ```
 
-Run a single suite:
+Update baseline screenshots after intentional UI changes:
 
 ```bash
-npx playwright test tests/smoke
+npm run test:visual:update
 ```
 
 ## Linting and formatting
@@ -56,18 +56,14 @@ npm run format
 npm run format:check
 ```
 
-ESLint uses `@typescript-eslint` for source files and `eslint-plugin-playwright` for tests under `tests/`. Prettier runs through `eslint-plugin-prettier`.
-
 ## Reporting
 
 | Reporter | Output | Purpose |
 |----------|--------|---------|
 | `line` | Console | Essential pass/fail output |
-| `html` | `playwright-report/` | HTML report with failure artifacts |
+| `html` | `playwright-report/` | HTML report with expected/actual/diff on screenshot failures |
 | `junit` | `test-results/junit-report.xml` | CI statistics |
 | Report Portal | Remote project | Enabled when `RP_API_KEY` is set |
-
-Failed tests retain trace, screenshot, and video. Report artifacts are gitignored.
 
 ## Project structure
 
@@ -81,6 +77,9 @@ tests/
     calculator.fixture.ts
   smoke/
     cloud-calculator.spec.ts
+  visual/
+    calculator-visual.spec.ts
+    calculator-visual.spec.ts-snapshots/
 
 playwright.config.ts
 eslint.config.mjs
@@ -93,10 +92,13 @@ tsconfig.json
 | Setting | Value |
 |---------|-------|
 | Base URL | `https://cloud.google.com` (`BASE_URL` env) |
+| Calculator path | `/products/calculator?hl=en` |
 | Browser | Chromium |
-| Parallelism | Enabled (`fullyParallel`) |
+| Visual tolerance | `maxDiffPixels: 1500` |
 | Trace / screenshot / video | On failure only |
 | Retries | 1 in CI, 0 locally |
+
+When a screenshot test fails, open `npm run test:report` to compare expected, actual, and diff images.
 
 ## Troubleshooting
 
@@ -105,6 +107,7 @@ tsconfig.json
 | Node version | Run `nvm use` |
 | Browser not found | Run `npx playwright install chromium` |
 | Cookie banner | Handled in the calculator fixture |
+| Snapshot mismatch | Run `npm run test:visual:update` locally |
 | Report Portal | Set `RP_*` variables in `.env` |
 
 ## Disclaimer
