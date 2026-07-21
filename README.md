@@ -18,7 +18,7 @@ nvm use
 
 ```bash
 npm install
-npx playwright install chromium
+npx playwright install chromium webkit
 cp .env.example .env
 ```
 
@@ -45,7 +45,10 @@ Run a single suite:
 
 ```bash
 npx playwright test tests/smoke
+npx playwright test tests/mobile --project="iPhone 15 Pro"
 ```
+
+Mobile and tablet projects use WebKit device profiles (`iPhone 15 Pro`, `iPad Pro 11`).
 
 ## Linting and formatting
 
@@ -81,6 +84,8 @@ tests/
     calculator.fixture.ts
   smoke/
     cloud-calculator.spec.ts
+  mobile/
+    mobile-navigation.spec.ts
 
 playwright.config.ts
 eslint.config.mjs
@@ -93,7 +98,7 @@ tsconfig.json
 | Setting | Value |
 |---------|-------|
 | Base URL | `https://cloud.google.com` (`BASE_URL` env) |
-| Browser | Chromium |
+| Browser | Chromium (desktop), WebKit (iPhone 15 Pro, iPad Pro 11) |
 | Parallelism | Enabled (`fullyParallel`) |
 | Trace / screenshot / video | On failure only |
 | Retries | 1 in CI, 0 locally |
@@ -103,7 +108,7 @@ tsconfig.json
 | Problem | Fix |
 |---------|-----|
 | Node version | Run `nvm use` |
-| Browser not found | Run `npx playwright install chromium` |
+| Browser not found | Run `npx playwright install chromium webkit` |
 | Cookie banner | Handled in the calculator fixture |
 | Report Portal | Set `RP_*` variables in `.env` |
 
