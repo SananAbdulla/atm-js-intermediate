@@ -10,6 +10,7 @@ export const test = base.extend<CalculatorFixtures>({
     const calculatorPage = new CalculatorPage(page);
     await calculatorPage.open();
     await calculatorPage.dismissCookieBanner();
+    await calculatorPage.prepareMobileView();
     await use(calculatorPage);
   },
 });
