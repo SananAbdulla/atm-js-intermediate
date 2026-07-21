@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "playwright test",
+    "test:ai": "playwright test tests/ai",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report",
