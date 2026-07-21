@@ -19,17 +19,16 @@ nvm use
 ```bash
 npm install
 npx playwright install chromium
+cp .env.example .env
 ```
 
-Optional `.env` file:
+Configure `.env` for optional overrides:
 
 ```env
 BASE_URL=https://cloud.google.com
-
-# Optional Report Portal integration
-RP_API_KEY=your_api_key
+RP_API_KEY=your_report_portal_token
 RP_ENDPOINT=https://reportportal.epam.com/api/v1
-RP_PROJECT=your_project_name
+RP_PROJECT=your_personal_project
 RP_LAUNCH=ATM Playwright Tests
 ```
 
@@ -48,6 +47,24 @@ Update baseline screenshots after intentional UI changes:
 npm run test:visual:update
 ```
 
+## Linting and formatting
+
+```bash
+npm run lint
+npm run lint:fix
+npm run format
+npm run format:check
+```
+
+## Reporting
+
+| Reporter | Output | Purpose |
+|----------|--------|---------|
+| `line` | Console | Essential pass/fail output |
+| `html` | `playwright-report/` | HTML report with expected/actual/diff on screenshot failures |
+| `junit` | `test-results/junit-report.xml` | CI statistics |
+| Report Portal | Remote project | Enabled when `RP_API_KEY` is set |
+
 ## Project structure
 
 ```
@@ -65,30 +82,33 @@ tests/
     calculator-visual.spec.ts-snapshots/
 
 playwright.config.ts
+eslint.config.mjs
+.prettierrc
 tsconfig.json
 ```
 
 ## Configuration
 
-| Setting              | Value                                      |
-|----------------------|--------------------------------------------|
-| Base URL             | `https://cloud.google.com` (`BASE_URL` env) |
-| Calculator path      | `/products/calculator?hl=en`               |
-| Browser              | Chromium                                   |
-| Visual tolerance     | `maxDiffPixels: 100`                       |
-| Console reporter     | `line`                                     |
-| HTML report          | `playwright-report/`                       |
+| Setting | Value |
+|---------|-------|
+| Base URL | `https://cloud.google.com` (`BASE_URL` env) |
+| Calculator path | `/products/calculator?hl=en` |
+| Browser | Chromium |
+| Visual tolerance | `maxDiffPixels: 1500` |
+| Trace / screenshot / video | On failure only |
+| Retries | 1 in CI, 0 locally |
 
-When a screenshot test fails, open `npm run test:report` to compare expected, actual, and diff images in the HTML report.
+When a screenshot test fails, open `npm run test:report` to compare expected, actual, and diff images.
 
 ## Troubleshooting
 
-| Problem           | Fix                                      |
-|-------------------|------------------------------------------|
-| Node version      | Run `nvm use`                            |
-| Browser not found | Run `npx playwright install chromium`    |
-| Cookie banner     | Handled in the calculator fixture        |
+| Problem | Fix |
+|---------|-----|
+| Node version | Run `nvm use` |
+| Browser not found | Run `npx playwright install chromium` |
+| Cookie banner | Handled in the calculator fixture |
 | Snapshot mismatch | Run `npm run test:visual:update` locally |
+| Report Portal | Set `RP_*` variables in `.env` |
 
 ## Disclaimer
 
