@@ -7,7 +7,9 @@ test.describe('Cloud Calculator', () => {
     await expect(calculatorPage.addEstimateButton()).toBeVisible();
   });
 
-  test('should open the add estimate dialog with Compute Engine option', async ({ calculatorPage }) => {
+  test('should open the add estimate dialog with Compute Engine option', async ({
+    calculatorPage,
+  }) => {
     await calculatorPage.openAddEstimateDialog();
 
     await expect(calculatorPage.addEstimationModalWindow()).toBeVisible();
