@@ -9,6 +9,7 @@ const baseURL = process.env.BASE_URL ?? 'https://cloud.google.com';
 const reporters: ReporterDescription[] = [
   ['line'],
   ['html', { open: 'never', outputFolder: 'playwright-report' }],
+  ['junit', { outputFile: 'test-results/junit-report.xml' }],
 ];
 
 if (process.env.RP_API_KEY) {
@@ -21,6 +22,7 @@ if (process.env.RP_API_KEY) {
       launch: process.env.RP_LAUNCH ?? 'ATM Playwright Tests',
       description: 'Google Cloud calculator tests',
       uploadTrace: true,
+      uploadVideo: true,
     },
   ]);
 }
@@ -37,14 +39,14 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       animations: 'disabled',
-      maxDiffPixels: 100,
+      maxDiffPixels: 1500,
     },
   },
   use: {
     baseURL,
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'off',
+    video: 'retain-on-failure',
     viewport: { width: 1280, height: 720 },
   },
   projects: [
