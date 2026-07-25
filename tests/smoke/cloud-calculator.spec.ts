@@ -18,6 +18,8 @@ test.describe('Cloud Calculator', () => {
 
   test('should close the add estimate dialog when pressing Escape', async ({ calculatorPage }) => {
     await calculatorPage.openAddEstimateDialog();
+    await expect(calculatorPage.addEstimationDialogHeading()).toBeVisible();
+
     await calculatorPage.closeAddEstimateDialog();
 
     await expect(calculatorPage.addEstimationDialogHeading()).toBeHidden();

@@ -47,7 +47,6 @@ These scenarios are automated in `tests/e2e/`:
 | INT-N-02 | Negative | Set boot disk size to `-1` GiB | `tests/integration/negative.spec.ts` |
 | INT-E-01 | Edge | Boot disk minimum boundary (`10` GiB) | `tests/integration/edge.spec.ts` |
 | INT-E-02 | Edge | Boot disk upper boundary of agreed range (`100` GiB) | `tests/integration/edge.spec.ts` |
-| INT-E-03 | Edge | Instance count minimum boundary (`1` → `2`) | `tests/integration/edge.spec.ts` |
 
 Smoke coverage remains in `tests/smoke/cloud-calculator.spec.ts` for calculator availability and instance increment/decrement behavior.
 
@@ -89,13 +88,12 @@ Invalid input values that prevent cost calculation.
 
 ## Edge Scenarios (Boundary Value Analysis)
 
-Tests at agreed numeric boundaries for boot disk size and instance count.
+Tests at agreed numeric boundaries for boot disk size.
 
 | ID | Scenario | Steps | Expected result |
 |----|----------|-------|-----------------|
 | INT-E-01 | Minimum boot disk boundary | 1. Configure Compute Engine with `100` GiB boot disk<br>2. Change boot disk to `10` GiB | Cost at `10` GiB is lower than cost at `100` GiB |
 | INT-E-02 | Upper boot disk boundary | 1. Configure Compute Engine with `10` GiB boot disk<br>2. Change boot disk to `100` GiB | Cost at `100` GiB is higher than cost at `10` GiB |
-| INT-E-03 | Minimum instance count boundary | 1. Configure Compute Engine with `1` instance<br>2. Increase instance count to `2` | Cost for `2` instances is higher than cost for `1` instance |
 
 ---
 

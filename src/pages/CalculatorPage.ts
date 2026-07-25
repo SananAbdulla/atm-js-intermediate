@@ -6,16 +6,28 @@ export class CalculatorPage extends BasePage {
     super(page, '/products/calculator');
   }
 
+  cookieAcceptButton(): Locator {
+    return this.page.getByRole('button', { name: 'OK, got it' });
+  }
+
   async dismissCookieBanner(): Promise<void> {
     const dismissButton = this.page.getByRole('button', { name: 'Dismiss' });
-    if (await dismissButton.isVisible({ timeout: 3_000 })) {
+    if (await dismissButton.isVisible({ timeout: 2_000 })) {
       await dismissButton.click();
-      await dismissButton.waitFor({ state: 'hidden' });
+      return;
+    }
+
+    const acceptButton = this.cookieAcceptButton();
+    if (await acceptButton.isVisible({ timeout: 2_000 })) {
+      await acceptButton.click();
     }
   }
 
   addEstimateButton(): Locator {
-    return this.page.getByRole('button', { name: 'Add to estimate' }).first();
+    return this.page
+      .getByRole('heading', { name: 'Get started with your estimate' })
+      .locator('xpath=ancestor::div[1]')
+      .getByRole('button', { name: 'Add to estimate' });
   }
 
   addEstimationDialogHeading(): Locator {
@@ -64,18 +76,16 @@ export class CalculatorPage extends BasePage {
 
   incrementInstancesButton(): Locator {
     return this.page
-      .locator('div')
-      .filter({ has: this.configurationBlock() })
-      .getByRole('button', { name: 'Increment' })
-      .first();
+      .getByText('Number of instances*', { exact: true })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]')
+      .getByRole('button', { name: 'Increment' });
   }
 
   decrementInstancesButton(): Locator {
     return this.page
-      .locator('div')
-      .filter({ has: this.configurationBlock() })
-      .getByRole('button', { name: 'Decrement' })
-      .first();
+      .getByText('Number of instances*', { exact: true })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Decrement"]][1]')
+      .getByRole('button', { name: 'Decrement' });
   }
 
   pageHeading(): Locator {
@@ -89,6 +99,10 @@ export class CalculatorPage extends BasePage {
     await this.addEstimationDialogHeading().waitFor({ state: 'visible' });
   }
 
+  async selectComputeEngine(): Promise<void> {
+    await this.computeEngineOption().click();
+  }
+
   async closeAddEstimateDialog(): Promise<void> {
     await this.page.keyboard.press('Escape');
     await this.addEstimationDialogHeading().waitFor({ state: 'hidden' });
@@ -96,7 +110,7 @@ export class CalculatorPage extends BasePage {
 
   async addComputeEngineEstimate(): Promise<void> {
     await this.openAddEstimateDialog();
-    await this.computeEngineOption().click();
+    await this.selectComputeEngine();
     await this.viewDetailsButton().click();
     await this.configurationBlock().waitFor({ state: 'visible' });
     await this.waitForStableMonthlyCost();
@@ -130,13 +144,6 @@ export class CalculatorPage extends BasePage {
     return match ? parseFloat(match[1].replace(',', '')) : NaN;
   }
 
-  private async selectVisibleOption(option: Locator): Promise<void> {
-    const visibleOption = option.filter({ visible: true }).first();
-    await visibleOption.waitFor({ state: 'visible' });
-    await visibleOption.scrollIntoViewIfNeeded();
-    await visibleOption.click();
-  }
-
   private async openComboboxAndSelect(combobox: Locator, option: Locator): Promise<void> {
     const visibleOption = option.filter({ visible: true }).first();
 
@@ -158,9 +165,7 @@ export class CalculatorPage extends BasePage {
     );
     await this.seriesCombobox()
       .filter({ hasText: new RegExp(series, 'i') })
-      .waitFor({
-        state: 'visible',
-      });
+      .waitFor({ state: 'visible' });
   }
 
   async selectMachineType(machineType: string): Promise<void> {

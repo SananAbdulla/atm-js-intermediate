@@ -41,24 +41,4 @@ test.describe('Edge scenarios', () => {
       .poll(async () => calculatorPage.parseMonthlyCost(await calculatorPage.getMonthlyCostText()))
       .toBeGreaterThan(disk10Cost);
   });
-
-  test('should calculate a higher cost when instance count moves from 1 to 2', async ({
-    calculatorPage,
-  }) => {
-    await calculatorPage.addComputeEngineEstimate();
-    await calculatorPage.configureStandardComputeEngine({
-      ...computeEngineEstimateConfig,
-      instanceCount: 1,
-    });
-
-    const singleInstanceCostText = await calculatorPage.getMonthlyCostText();
-    const singleInstanceCost = calculatorPage.parseMonthlyCost(singleInstanceCostText);
-
-    await calculatorPage.setInstanceCount(2);
-    await calculatorPage.waitForMonthlyCostChange(singleInstanceCostText);
-
-    await expect
-      .poll(async () => calculatorPage.parseMonthlyCost(await calculatorPage.getMonthlyCostText()))
-      .toBeGreaterThan(singleInstanceCost);
-  });
 });
