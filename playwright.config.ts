@@ -30,10 +30,11 @@ if (process.env.RP_API_KEY) {
 export default defineConfig({
   testDir: './tests',
   outputDir: 'test-results',
-  fullyParallel: true,
+  timeout: 120_000,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  retries: process.env.CI ? 2 : 1,
+  workers: 1,
   reporter: reporters,
   use: {
     baseURL,
