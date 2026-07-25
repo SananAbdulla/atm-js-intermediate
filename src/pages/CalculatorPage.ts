@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 
 export class CalculatorPage extends BasePage {
@@ -7,17 +7,10 @@ export class CalculatorPage extends BasePage {
   }
 
   async dismissCookieBanner(): Promise<void> {
-    const candidates = [
-      this.page.getByRole('button', { name: 'Dismiss' }),
-      this.page.getByRole('button', { name: 'OK, got it' }),
-      this.page.getByRole('button', { name: 'OK', exact: true }),
-    ];
-
-    for (const button of candidates) {
-      if (await button.isVisible().catch(() => false)) {
-        await button.click();
-        return;
-      }
+    const dismissButton = this.page.getByRole('button', { name: 'Dismiss' });
+    if (await dismissButton.isVisible({ timeout: 3_000 })) {
+      await dismissButton.click();
+      await dismissButton.waitFor({ state: 'hidden' });
     }
   }
 
@@ -25,7 +18,7 @@ export class CalculatorPage extends BasePage {
     return this.page.getByRole('button', { name: 'Add to estimate' }).first();
   }
 
-  addEstimationModalWindow(): Locator {
+  addEstimationDialogHeading(): Locator {
     return this.page.getByRole('heading', { name: 'Add to this estimate' });
   }
 
@@ -43,6 +36,30 @@ export class CalculatorPage extends BasePage {
 
   monthlyCost(): Locator {
     return this.page.locator('.egBpsb .D0aEmf');
+  }
+
+  instanceCountInput(): Locator {
+    return this.page.getByRole('spinbutton', { name: /Number of instances/ });
+  }
+
+  bootDiskSizeInput(): Locator {
+    return this.page.getByRole('spinbutton', { name: /Boot disk size/ });
+  }
+
+  seriesCombobox(): Locator {
+    return this.page.getByRole('combobox', { name: 'Series' });
+  }
+
+  machineTypeCombobox(): Locator {
+    return this.page.getByRole('combobox', { name: 'Machine type' });
+  }
+
+  operatingSystemCombobox(): Locator {
+    return this.page.getByRole('combobox', { name: 'Operating System / Software' });
+  }
+
+  regionCombobox(): Locator {
+    return this.page.getByRole('combobox', { name: 'Region' });
   }
 
   incrementInstancesButton(): Locator {
@@ -67,20 +84,22 @@ export class CalculatorPage extends BasePage {
     });
   }
 
-  async addComputeEngineEstimate(): Promise<void> {
+  async openAddEstimateDialog(): Promise<void> {
     await this.addEstimateButton().click();
-    await this.addEstimationModalWindow().waitFor({ state: 'visible' });
+    await this.addEstimationDialogHeading().waitFor({ state: 'visible' });
+  }
+
+  async closeAddEstimateDialog(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+    await this.addEstimationDialogHeading().waitFor({ state: 'hidden' });
+  }
+
+  async addComputeEngineEstimate(): Promise<void> {
+    await this.openAddEstimateDialog();
     await this.computeEngineOption().click();
-
-    if (
-      await this.viewDetailsButton()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      await this.viewDetailsButton().click();
-    }
-
+    await this.viewDetailsButton().click();
     await this.configurationBlock().waitFor({ state: 'visible' });
+    await this.waitForStableMonthlyCost();
   }
 
   async addInstances(count: number): Promise<void> {
@@ -111,41 +130,73 @@ export class CalculatorPage extends BasePage {
     return match ? parseFloat(match[1].replace(',', '')) : NaN;
   }
 
-  private async selectComboboxOption(
-    comboboxName: string,
-    optionMatcher: RegExp | string,
-  ): Promise<void> {
-    await this.page.getByRole('combobox', { name: comboboxName }).click();
-    const option =
-      typeof optionMatcher === 'string'
-        ? this.page.getByRole('option', { name: optionMatcher })
-        : this.page.getByRole('option').filter({ hasText: optionMatcher }).first();
-    await option.click();
+  private async selectVisibleOption(option: Locator): Promise<void> {
+    const visibleOption = option.filter({ visible: true }).first();
+    await visibleOption.waitFor({ state: 'visible' });
+    await visibleOption.scrollIntoViewIfNeeded();
+    await visibleOption.click();
+  }
+
+  private async openComboboxAndSelect(combobox: Locator, option: Locator): Promise<void> {
+    const visibleOption = option.filter({ visible: true }).first();
+
+    await combobox.scrollIntoViewIfNeeded();
+
+    await expect(async () => {
+      await combobox.click();
+      await expect(visibleOption).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+
+    await visibleOption.scrollIntoViewIfNeeded();
+    await visibleOption.click();
   }
 
   async selectSeries(series: string): Promise<void> {
-    await this.selectComboboxOption('Series', new RegExp(`^${series}`));
+    await this.openComboboxAndSelect(
+      this.seriesCombobox(),
+      this.page.locator(`[role="option"][data-value="${series.toLowerCase()}"]`),
+    );
+    await this.seriesCombobox()
+      .filter({ hasText: new RegExp(series, 'i') })
+      .waitFor({
+        state: 'visible',
+      });
   }
 
   async selectMachineType(machineType: string): Promise<void> {
-    await this.page.getByRole('combobox', { name: 'Machine type' }).click();
-    await this.page.locator(`[role="option"][data-value="${machineType}"]`).click();
+    await this.openComboboxAndSelect(
+      this.machineTypeCombobox(),
+      this.page.locator(`[role="option"][data-value="${machineType}"]`),
+    );
+    await this.machineTypeCombobox().filter({ hasText: machineType }).waitFor({ state: 'visible' });
   }
 
   async selectOperatingSystem(operatingSystem: RegExp | string): Promise<void> {
-    await this.selectComboboxOption('Operating System / Software', operatingSystem);
+    const option =
+      typeof operatingSystem === 'string'
+        ? this.page.getByRole('option', { name: operatingSystem })
+        : this.page.getByRole('option').filter({ hasText: operatingSystem });
+    await this.openComboboxAndSelect(this.operatingSystemCombobox(), option);
   }
 
   async selectRegion(region: RegExp | string): Promise<void> {
-    await this.selectComboboxOption('Region', region);
+    const option =
+      typeof region === 'string'
+        ? this.page.getByRole('option', { name: region })
+        : this.page.getByRole('option').filter({ hasText: region });
+    await this.openComboboxAndSelect(this.regionCombobox(), option);
   }
 
   async setBootDiskSize(gib: number): Promise<void> {
-    await this.page.getByRole('spinbutton', { name: /Boot disk size/ }).fill(String(gib));
+    const diskInput = this.bootDiskSizeInput();
+    await diskInput.fill(String(gib));
+    await diskInput.press('Tab');
   }
 
   async setInstanceCount(count: number): Promise<void> {
-    await this.page.getByRole('spinbutton', { name: /Number of instances/ }).fill(String(count));
+    const instanceInput = this.instanceCountInput();
+    await instanceInput.fill(String(count));
+    await instanceInput.press('Tab');
   }
 
   async configureStandardComputeEngine(options: {
@@ -156,11 +207,49 @@ export class CalculatorPage extends BasePage {
     bootDiskSizeGiB: number;
     instanceCount: number;
   }): Promise<void> {
+    const costBefore = await this.getMonthlyCostText();
+
     await this.selectSeries(options.series);
     await this.selectMachineType(options.machineType);
     await this.selectOperatingSystem(options.operatingSystem);
     await this.selectRegion(options.region);
     await this.setBootDiskSize(options.bootDiskSizeGiB);
     await this.setInstanceCount(options.instanceCount);
+
+    await this.waitForMonthlyCostChange(costBefore);
+  }
+
+  async waitForMonthlyCostChange(previousCost: string): Promise<void> {
+    await expect
+      .poll(async () => this.getMonthlyCostText(), { timeout: 60_000 })
+      .not.toBe(previousCost);
+    await this.waitForStableMonthlyCost();
+  }
+
+  async waitForStableMonthlyCost(options?: { allowPlaceholder?: boolean }): Promise<void> {
+    const allowPlaceholder = options?.allowPlaceholder ?? false;
+    let previousCost = '';
+    let stableReads = 0;
+
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const currentCost = await this.getMonthlyCostText();
+      const isDollarAmount = /\$\d+\.\d{2}/.test(currentCost);
+      const isPlaceholder = currentCost === '--';
+      const isRecognizedCost = isDollarAmount || (allowPlaceholder && isPlaceholder);
+
+      if (isRecognizedCost && currentCost === previousCost) {
+        stableReads += 1;
+        if (stableReads >= 3) {
+          return;
+        }
+      } else {
+        stableReads = 0;
+      }
+
+      previousCost = currentCost;
+      await this.page.waitForTimeout(500);
+    }
+
+    throw new Error(`Monthly cost did not stabilize. Last value: ${previousCost}`);
   }
 }

@@ -1,50 +1,119 @@
 # Test Checklist — GCP Pricing Calculator (Compute Engine)
 
-Manual test cases for user story: **Estimate Monthly Cost of Specific GCP Service**.
-
-Target: [Google Cloud Pricing Calculator](https://cloud.google.com/products/calculator)
+Target application: [Google Cloud Pricing Calculator](https://cloud.google.com/products/calculator)
 
 ---
 
-## Positive scenarios
+## User Story Scope
+
+**Story:** As a user, I want to estimate the monthly cost of a specific GCP service so I can plan my cloud budget.
+
+**In scope for this iteration:**
+
+- Compute Engine cost estimation on the pricing calculator
+- Configuring machine type, instance count, boot disk size, operating system, and region
+- Displaying the estimated monthly cost in USD
+- Comparing cost impact when machine type changes within the same configuration
+
+**Out of scope for this iteration:**
+
+- Other GCP products (Cloud Storage, BigQuery, GKE, and so on)
+- Billing account sign-in and negotiated pricing
+- Currency conversion
+- Exporting or sharing estimates
+- FedRAMP compliance toggle
+- GPU, local SSD, and advanced provisioning options
+
+---
+
+## User Scenarios (from instructions)
+
+These scenarios are automated in `tests/e2e/`:
+
+| ID | Scenario | Expected result | Automated |
+|----|----------|-----------------|-----------|
+| US-01 | Estimate Compute Engine with n1-standard-1, 2 instances, 100 GiB disk, Ubuntu Pro, Frankfurt (europe-west3) | Monthly cost equals `$116.12` | Yes — `tests/e2e/compute-engine-scenarios.spec.ts` |
+| US-02 | Change machine type from n1-standard-1 to n1-standard-2 with the same configuration | Monthly cost updates to `$207.73` | Yes — `tests/e2e/compute-engine-scenarios.spec.ts` |
+
+---
+
+## Test Cases To Be Automated
+
+| ID | Type | Scenario | Automated test |
+|----|------|----------|----------------|
+| INT-P-01 | Positive | Close add estimate dialog without selecting a product | `tests/integration/positive.spec.ts` |
+| INT-P-02 | Positive | Add Compute Engine and display valid configuration | `tests/integration/positive.spec.ts` |
+| INT-N-01 | Negative | Set instance count to `0` | `tests/integration/negative.spec.ts` |
+| INT-N-02 | Negative | Set boot disk size to `-1` GiB | `tests/integration/negative.spec.ts` |
+| INT-E-01 | Edge | Boot disk minimum boundary (`10` GiB) | `tests/integration/edge.spec.ts` |
+| INT-E-02 | Edge | Boot disk upper boundary of agreed range (`100` GiB) | `tests/integration/edge.spec.ts` |
+| INT-E-03 | Edge | Instance count minimum boundary (`1` → `2`) | `tests/integration/edge.spec.ts` |
+
+Smoke coverage remains in `tests/smoke/cloud-calculator.spec.ts` for calculator availability and instance increment/decrement behavior.
+
+---
+
+## Test Cases Not To Be Automated
+
+| ID | Type | Scenario | Reason |
+|----|------|----------|--------|
+| MAN-01 | Positive | Verify pricing breakdown details in the cost panel | Requires manual visual validation of detailed line items |
+| MAN-02 | Positive | Compare estimate with signed-in billing account pricing | Requires authenticated Google account |
+| MAN-03 | Negative | Attempt to estimate unsupported legacy machine families | Requires manual exploration outside agreed scope |
+| MAN-04 | Edge | Validate calculator behavior in non-Chromium browsers | Out of current Playwright project scope |
+| MAN-05 | Edge | Validate cookie banner text and legal copy | Legal copy is not functional logic for this story |
+
+---
+
+## Positive Scenarios (Equivalence Partitioning)
+
+Valid input combinations that represent normal successful usage.
 
 | ID | Scenario | Steps | Expected result |
 |----|----------|-------|-----------------|
-| P-01 | Estimate Compute Engine monthly cost | 1. Open calculator<br>2. Add Compute Engine to estimate<br>3. Select N1 series, n1-standard-1<br>4. Set 2 instances<br>5. Set boot disk to 100 GiB<br>6. Select Ubuntu Pro OS<br>7. Select Frankfurt (europe-west3) region | Monthly cost is displayed as a dollar amount greater than $0 |
-| P-02 | Compare machine type pricing | 1. Complete P-01 configuration<br>2. Note the monthly cost<br>3. Change machine type to n1-standard-2 | Monthly cost updates and is higher than n1-standard-1 cost |
-| P-03 | Add estimate dialog | 1. Click **Add to estimate**<br>2. Select Compute Engine | Instances configuration section appears with a visible monthly cost |
+| INT-P-01 | Close dialog without adding product | 1. Open calculator<br>2. Click **Add to estimate**<br>3. Press Escape | Dialog closes and no Compute Engine configuration appears |
+| INT-P-02 | Add Compute Engine estimate | 1. Open calculator<br>2. Add Compute Engine to estimate | Configuration section is visible and monthly cost is displayed |
 
 ---
 
-## Negative scenarios
+## Negative Scenarios
+
+Invalid input values that prevent cost calculation.
 
 | ID | Scenario | Steps | Expected result |
 |----|----------|-------|-----------------|
-| N-01 | Cancel add estimate dialog | 1. Click **Add to estimate**<br>2. Press Escape or close the dialog | Dialog closes; no Compute Engine configuration is added |
-| N-02 | Dismiss without selecting product | 1. Click **Add to estimate**<br>2. Close dialog without choosing a product | Calculator remains on the welcome page with no new line items |
+| INT-N-01 | Zero instance count | 1. Configure a valid Compute Engine estimate<br>2. Set instance count to `0` | Monthly cost is not calculated and shows `--` |
+| INT-N-02 | Negative boot disk size | 1. Configure a valid Compute Engine estimate<br>2. Set boot disk size to `-1` GiB | Monthly cost is not calculated and shows `--` |
 
 ---
 
-## Edge cases
+## Edge Scenarios (Boundary Value Analysis)
+
+Tests at agreed numeric boundaries for boot disk size and instance count.
 
 | ID | Scenario | Steps | Expected result |
 |----|----------|-------|-----------------|
-| E-01 | Single vs multiple instances | 1. Configure n1-standard-1 with Ubuntu Pro in Frankfurt<br>2. Set 1 instance and note cost<br>3. Increase to 3 instances | Cost increases when instance count rises |
-| E-02 | Boot disk size impact | 1. Configure standard CE setup<br>2. Set boot disk to 10 GiB and note cost<br>3. Increase boot disk to 500 GiB | Cost increases with larger boot disk |
-| E-03 | Cookie banner handling | 1. Open calculator in a fresh session | Cookie banner can be dismissed; calculator remains usable |
+| INT-E-01 | Minimum boot disk boundary | 1. Configure Compute Engine with `100` GiB boot disk<br>2. Change boot disk to `10` GiB | Cost at `10` GiB is lower than cost at `100` GiB |
+| INT-E-02 | Upper boot disk boundary | 1. Configure Compute Engine with `10` GiB boot disk<br>2. Change boot disk to `100` GiB | Cost at `100` GiB is higher than cost at `10` GiB |
+| INT-E-03 | Minimum instance count boundary | 1. Configure Compute Engine with `1` instance<br>2. Increase instance count to `2` | Cost for `2` instances is higher than cost for `1` instance |
 
 ---
 
-## Automated coverage
+## Expected Cost Reference
 
-The following Playwright E2E tests in `tests/e2e/compute-engine-cost.spec.ts` automate the scenarios above:
+Captured from the pricing calculator on 25 Jul 2026 with USD selected:
 
-| Manual ID | Automated test |
-|-----------|----------------|
-| P-01 | `should estimate monthly cost for n1-standard-1 with Ubuntu Pro in Frankfurt` |
-| P-02 | `should show higher cost for n1-standard-2 than n1-standard-1` |
-| E-01 | `should increase cost when instance count is raised` |
-| E-02 | `should increase cost when boot disk size is enlarged` |
-| N-01 | `should not add estimate when add dialog is cancelled` |
+| Configuration | Expected monthly cost |
+|---------------|----------------------|
+| n1-standard-1, 2 instances, 100 GiB, Ubuntu Pro, Frankfurt | `$116.12` |
+| n1-standard-2, same configuration | `$207.73` |
 
-Smoke tests in `tests/smoke/cloud-calculator.spec.ts` cover P-03 and additional dialog interactions.
+---
+
+## Folder Structure
+
+| Folder | Content |
+|--------|---------|
+| `tests/e2e/` | User scenarios from instructions (US-01, US-02) |
+| `tests/integration/` | Positive, negative, and edge automated cases |
+| `tests/smoke/` | Basic calculator availability checks |
