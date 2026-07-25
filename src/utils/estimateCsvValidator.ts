@@ -13,14 +13,29 @@ export type EstimateLineItem = {
 
 const COMPUTE_ENGINE_LINE_PREFIX = 'Instances (Compute Engine)';
 
+export const EXPECTED_CSV_HEADERS = [
+  'service_display_name',
+  'name',
+  'quantity',
+  'region',
+  'service_id',
+  'sku',
+  'total_price, USD',
+  'notes',
+] as const;
+
+export const EXPECTED_CSV_COLUMN_COUNT = EXPECTED_CSV_HEADERS.length;
+
+/** Default Compute Engine estimate export row count (header + line items + totals/footer). */
+export const EXPECTED_CSV_ROW_COUNT = 12;
+
 const lineItemConfig: ValidatorConfig = {
   headers: [
     {
       name: 'service_display_name',
       inputName: 'serviceDisplayName',
       required: true,
-      validate: (value) =>
-        typeof value === 'string' && value.includes('Compute Engine'),
+      validate: (value) => typeof value === 'string' && value.includes('Compute Engine'),
     },
     {
       name: 'name',
@@ -63,8 +78,55 @@ const lineItemConfig: ValidatorConfig = {
   parserConfig: { dynamicTyping: true },
 };
 
+export function parseCsvLine(line: string): string[] {
+  const values: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      values.push(current);
+      current = '';
+      continue;
+    }
+
+    current += char;
+  }
+
+  values.push(current);
+  return values;
+}
+
+export function getCsvRows(csvContent: string): string[] {
+  return csvContent.split(/\r?\n/).filter((line) => line.length > 0);
+}
+
+export function getCsvHeaders(csvContent: string): string[] {
+  const rows = getCsvRows(csvContent);
+  if (rows.length === 0) {
+    throw new Error('Exported CSV is empty');
+  }
+
+  return parseCsvLine(rows[0]);
+}
+
+export function getCsvRowCount(csvContent: string): number {
+  return getCsvRows(csvContent).length;
+}
+
+export function getCsvColumnCount(csvContent: string): number {
+  return getCsvHeaders(csvContent).length;
+}
+
 export function extractLineItemsSection(csvContent: string): string {
-  const lines = csvContent.trim().split('\n');
+  const lines = getCsvRows(csvContent);
   const header = lines[0];
   const itemLines = lines.slice(1).filter((line) => line.startsWith(COMPUTE_ENGINE_LINE_PREFIX));
 
@@ -96,9 +158,7 @@ export function costsMatch(uiCostText: string, csvTotalUsd: number): boolean {
   return Math.abs(uiAmount - csvTotalUsd) < 0.02;
 }
 
-export async function validateEstimateLineItems(
-  csvContent: string,
-): Promise<EstimateLineItem[]> {
+export async function validateEstimateLineItems(csvContent: string): Promise<EstimateLineItem[]> {
   const section = extractLineItemsSection(csvContent);
 
   if (!section.includes(COMPUTE_ENGINE_LINE_PREFIX)) {
