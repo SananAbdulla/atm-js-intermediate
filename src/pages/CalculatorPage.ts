@@ -132,4 +132,49 @@ export class CalculatorPage extends BasePage {
     const text = await this.monthlyCost().textContent();
     return text?.trim() ?? '';
   }
+
+  priceLabels(): Locator {
+    return this.page.getByText(/\$\d+[\d,]*\.\d{2}/);
+  }
+
+  chatConfigureButton(): Locator {
+    return this.page.getByRole('button', { name: /Chat to configure/i });
+  }
+
+  async prepareForScreenshot(): Promise<void> {
+    await this.dismissCookieBanner();
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.evaluate(async () => {
+      await document.fonts.ready;
+
+      await Promise.all(
+        [...document.images].map((image) => {
+          if (image.complete) {
+            return Promise.resolve();
+          }
+
+          return new Promise<void>((resolve) => {
+            image.addEventListener('load', () => resolve(), { once: true });
+            image.addEventListener('error', () => resolve(), { once: true });
+          });
+        }),
+      );
+    });
+
+    await this.page.addStyleTag({
+      content: `
+        *, *::before, *::after {
+          animation: none !important;
+          animation-duration: 0s !important;
+          transition: none !important;
+          transition-duration: 0s !important;
+          caret-color: transparent !important;
+        }
+      `,
+    });
+  }
+
+  screenshotMasks(): Locator[] {
+    return [this.priceLabels(), this.chatConfigureButton(), this.monthlyCost()];
+  }
 }

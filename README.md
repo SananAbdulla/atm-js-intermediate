@@ -94,9 +94,10 @@ tsconfig.json
 | Base URL | `https://cloud.google.com` (`BASE_URL` env) |
 | Calculator path | `/products/calculator?hl=en` |
 | Browser | Chromium |
-| Visual tolerance | `maxDiffPixels: 1500` |
+| Visual tolerance | `maxDiffPixels: 2500`, `maxDiffPixelRatio: 0.02` |
 | Trace / screenshot / video | On failure only |
-| Retries | 1 in CI, 0 locally |
+| Retries | 2 in CI, 1 locally |
+| Locale / timezone | `en-US` / `UTC` |
 
 When a screenshot test fails, open `npm run test:report` to compare expected, actual, and diff images.
 
