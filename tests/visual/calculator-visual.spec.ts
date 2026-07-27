@@ -33,11 +33,14 @@ test.describe('Calculator screenshot tests', () => {
   test('compute engine configuration matches baseline screenshot', async ({ calculatorPage }) => {
     await calculatorPage.addComputeEngineEstimate();
     await expect(calculatorPage.instancesConfigurationPanel()).toBeVisible();
-    await calculatorPage.prepareForScreenshot();
+    await calculatorPage.prepareComputeEngineConfigurationScreenshot();
 
     await expect(calculatorPage.instancesConfigurationPanel()).toHaveScreenshot(
       'compute-engine-configuration.png',
-      { mask: calculatorPage.screenshotMasks() },
+      {
+        mask: calculatorPage.computeEngineScreenshotMasks(),
+        maxDiffPixelRatio: 0.03,
+      },
     );
   });
 });

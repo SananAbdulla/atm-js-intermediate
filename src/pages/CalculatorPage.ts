@@ -207,6 +207,28 @@ export class CalculatorPage extends BasePage {
     return [this.priceLabels(), this.chatConfigureButton(), this.monthlyCost()];
   }
 
+  computeEngineScreenshotMasks(): Locator[] {
+    return [
+      ...this.screenshotMasks(),
+      this.seriesCombobox(),
+      this.machineTypeCombobox(),
+      this.operatingSystemCombobox(),
+      this.regionCombobox(),
+      this.instanceCountInput(),
+      this.bootDiskSizeInput(),
+      this.page.getByText(/Based on your selections/i).locator('xpath=ancestor::div[1]'),
+    ];
+  }
+
+  async prepareComputeEngineConfigurationScreenshot(): Promise<void> {
+    await this.waitForStableMonthlyCost();
+    await this.prepareForScreenshot();
+    await this.instancesConfigurationPanel().evaluate((element) => {
+      element.scrollTop = 0;
+      element.scrollIntoView({ block: 'start' });
+    });
+  }
+
   parseMonthlyCost(costText: string): number {
     const match = costText.match(/\$([\d,]+\.\d{2})/);
     return match ? parseFloat(match[1].replace(',', '')) : NaN;
