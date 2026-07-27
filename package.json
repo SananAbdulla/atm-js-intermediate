@@ -22,6 +22,7 @@
     "@playwright/test": "^1.51.1",
     "@reportportal/agent-js-playwright": "^5.3.1",
     "@types/node": "^26.1.1",
+    "csv-file-validator": "^2.2.0",
     "dotenv": "^17.4.2",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",

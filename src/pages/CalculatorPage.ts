@@ -1,4 +1,7 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { Download, expect, Locator, Page } from '@playwright/test';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { BasePage } from './BasePage';
 
 export class CalculatorPage extends BasePage {
@@ -94,6 +97,10 @@ export class CalculatorPage extends BasePage {
     });
   }
 
+  downloadEstimateCsvButton(): Locator {
+    return this.page.getByRole('button', { name: 'Download estimate as .csv' });
+  }
+
   async openAddEstimateDialog(): Promise<void> {
     await this.addEstimateButton().click();
     await this.addEstimationDialogHeading().waitFor({ state: 'visible' });
@@ -137,6 +144,18 @@ export class CalculatorPage extends BasePage {
   async getMonthlyCostText(): Promise<string> {
     const text = await this.monthlyCost().textContent();
     return text?.trim() ?? '';
+  }
+
+  async downloadEstimateCsv(): Promise<{ download: Download; filePath: string; content: string }> {
+    const downloadPromise = this.page.waitForEvent('download');
+    await this.downloadEstimateCsvButton().click();
+    const download = await downloadPromise;
+
+    const filePath = path.join(os.tmpdir(), download.suggestedFilename());
+    await download.saveAs(filePath);
+
+    const content = fs.readFileSync(filePath, 'utf8');
+    return { download, filePath, content };
   }
 
   parseMonthlyCost(costText: string): number {
