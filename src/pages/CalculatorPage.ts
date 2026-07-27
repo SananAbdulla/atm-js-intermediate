@@ -7,7 +7,7 @@ export class CalculatorPage extends BasePage {
   }
 
   cookieAcceptButton(): Locator {
-    return this.page.getByRole('button', { name: 'OK, got it' });
+    return this.page.getByRole('button', { name: /OK, got it|Aceptar/i });
   }
 
   async dismissCookieBanner(): Promise<void> {
@@ -110,6 +110,36 @@ export class CalculatorPage extends BasePage {
     return this.page
       .getByRole('heading', { name: /Instances configuration/i })
       .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]');
+  }
+
+  header(): Locator {
+    return this.page.locator('header');
+  }
+
+  footer(): Locator {
+    return this.page.locator('footer');
+  }
+
+  languageSelector(): Locator {
+    return this.footer().locator('.VfPpkd-O1htCb');
+  }
+
+  async dismissPricingChatWidget(): Promise<void> {
+    const chatMessage = this.page.getByText('Have questions about our pricing');
+    if (await chatMessage.isVisible()) {
+      await this.page.keyboard.press('Escape');
+    }
+  }
+
+  async selectLanguage(localeCode: string): Promise<void> {
+    await this.dismissPricingChatWidget();
+    await this.footer().scrollIntoViewIfNeeded();
+    await this.languageSelector().click({ force: true });
+
+    const listbox = this.page.getByRole('listbox', { name: 'Language Selector Menu' });
+    await listbox.waitFor({ state: 'visible' });
+    await listbox.locator(`[role="option"][data-value="${localeCode}"]`).click();
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async openAddEstimateDialog(): Promise<void> {
@@ -216,6 +246,7 @@ export class CalculatorPage extends BasePage {
       this.regionCombobox(),
       this.instanceCountInput(),
       this.bootDiskSizeInput(),
+      this.page.getByRole('radiogroup', { name: /Provisioning Model/i }),
       this.page.getByText(/Based on your selections/i).locator('xpath=ancestor::div[1]'),
     ];
   }
@@ -223,7 +254,9 @@ export class CalculatorPage extends BasePage {
   async prepareComputeEngineConfigurationScreenshot(): Promise<void> {
     await this.waitForStableMonthlyCost();
     await this.prepareForScreenshot();
-    await this.instancesConfigurationPanel().evaluate((element) => {
+    const panel = this.instancesConfigurationPanel();
+    await panel.scrollIntoViewIfNeeded();
+    await panel.evaluate((element) => {
       element.scrollTop = 0;
       element.scrollIntoView({ block: 'start' });
     });
