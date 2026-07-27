@@ -45,7 +45,19 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: /apple-.*\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'apple',
+      testMatch: /apple-.*\.spec\.ts/,
+      timeout: 90_000,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://www.apple.com',
+        actionTimeout: 15_000,
+        navigationTimeout: 45_000,
+      },
     },
   ],
 });

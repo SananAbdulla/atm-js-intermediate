@@ -1,6 +1,6 @@
 # ATM JS Intermediate — Test Automation Framework
 
-Smoke tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator).
+Smoke and localization tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator), plus Apple website regional localization coverage.
 
 Built with Playwright, TypeScript, and the Page Object Model.
 
@@ -45,7 +45,10 @@ Run a single suite:
 
 ```bash
 npx playwright test tests/smoke
+npx playwright test --project=apple
 ```
+
+Apple localization uses the `geo` cookie and the dedicated `apple` Playwright project (`baseURL=https://www.apple.com`). Checklist: `docs/APPLE-LOCALIZATION-CHECKLIST.md`.
 
 ## Linting and formatting
 
@@ -77,8 +80,14 @@ src/pages/
   CalculatorPage.ts
 
 tests/
+  data/
+    apple-regions.ts
+    localization.ts
   fixtures/
     calculator.fixture.ts
+  localization/
+    apple-*.spec.ts
+    calculator-localization.spec.ts
   smoke/
     cloud-calculator.spec.ts
 
