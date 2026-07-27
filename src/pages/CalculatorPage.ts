@@ -7,7 +7,7 @@ export class CalculatorPage extends BasePage {
   }
 
   cookieAcceptButton(): Locator {
-    return this.page.getByRole('button', { name: 'OK, got it' });
+    return this.page.getByRole('button', { name: /OK, got it|Aceptar/i });
   }
 
   async dismissCookieBanner(): Promise<void> {
@@ -65,6 +65,36 @@ export class CalculatorPage extends BasePage {
     return this.page.getByRole('heading', {
       name: /Welcome to Google Cloud.*pricing calculator/i,
     });
+  }
+
+  header(): Locator {
+    return this.page.locator('header');
+  }
+
+  footer(): Locator {
+    return this.page.locator('footer');
+  }
+
+  languageSelector(): Locator {
+    return this.footer().locator('.VfPpkd-O1htCb');
+  }
+
+  async dismissPricingChatWidget(): Promise<void> {
+    const chatMessage = this.page.getByText('Have questions about our pricing');
+    if (await chatMessage.isVisible()) {
+      await this.page.keyboard.press('Escape');
+    }
+  }
+
+  async selectLanguage(localeCode: string): Promise<void> {
+    await this.dismissPricingChatWidget();
+    await this.footer().scrollIntoViewIfNeeded();
+    await this.languageSelector().click({ force: true });
+
+    const listbox = this.page.getByRole('listbox', { name: 'Language Selector Menu' });
+    await listbox.waitFor({ state: 'visible' });
+    await listbox.locator(`[role="option"][data-value="${localeCode}"]`).click();
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async openAddEstimateDialog(): Promise<void> {
