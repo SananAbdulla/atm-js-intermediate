@@ -1,6 +1,6 @@
 # ATM JS Intermediate — Test Automation Framework
 
-Smoke tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator).
+Smoke tests for the [Google Cloud pricing calculator](https://cloud.google.com/products/calculator), plus Desmos graphing calculator visual comparisons.
 
 Built with Playwright, TypeScript, and the Page Object Model.
 
@@ -18,7 +18,7 @@ nvm use
 
 ```bash
 npm install
-npx playwright install chromium
+npx playwright install chromium firefox
 cp .env.example .env
 ```
 
@@ -45,7 +45,12 @@ Run a single suite:
 
 ```bash
 npx playwright test tests/smoke
+npm run test:desmos
+npm run test:desmos:update
+npm run test:desmos:firefox
 ```
+
+Desmos visual coverage lives in `tests/visual/desmos-visual.spec.ts` with checklist `docs/DESMOS-VISUAL-CHECKLIST.md`. Snapshot update uses `test:desmos:update`.
 
 ## Linting and formatting
 
