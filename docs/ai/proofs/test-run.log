@@ -1,0 +1,41 @@
+
+> atm-int@1.0.0 test
+> playwright test
+
+◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+
+Running 8 tests using 4 workers
+
+
+(node:83048) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+(node:83049) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+(node:83050) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+[1/8] [chromium] › tests/smoke/cloud-calculator.spec.ts:4:7 › Cloud Calculator › should display the pricing calculator page
+[2/8] [chromium] › tests/smoke/cloud-calculator.spec.ts:10:7 › Cloud Calculator › should open the add estimate dialog with Compute Engine option
+
+(node:83047) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[3/8] [chromium] › tests/ai/desmos-graph-equation.spec.ts:19:7 › Desmos graphing calculator › should zoom the graph after an equation is plotted
+◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+[4/8] [chromium] › tests/ai/desmos-graph-equation.spec.ts:8:7 › Desmos graphing calculator › should plot a quadratic equation entered in the expression list
+[5/8] [chromium] › tests/smoke/cloud-calculator.spec.ts:19:7 › Cloud Calculator › should close the add estimate dialog when pressing Escape
+[6/8] [chromium] › tests/smoke/cloud-calculator.spec.ts:28:7 › Cloud Calculator › should add a Compute Engine estimate to the calculator
+[7/8] [chromium] › tests/smoke/cloud-calculator.spec.ts:35:7 › Cloud Calculator › should increase monthly cost when instances are added
+[8/8] [chromium] › tests/smoke/cloud-calculator.spec.ts:45:7 › Cloud Calculator › should decrease monthly cost when instances are removed
+  8 passed (19.0s)
