@@ -20,7 +20,7 @@ if (process.env.RP_API_KEY) {
       endpoint: process.env.RP_ENDPOINT,
       project: process.env.RP_PROJECT,
       launch: process.env.RP_LAUNCH ?? 'ATM Playwright Tests',
-      description: 'Google Cloud calculator smoke tests',
+      description: 'Google Cloud calculator tests',
       uploadTrace: true,
       uploadVideo: true,
     },
@@ -36,11 +36,24 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: 1,
   reporter: reporters,
+  snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}{ext}',
+  expect: {
+    toHaveScreenshot: {
+      animations: 'disabled',
+      caret: 'hide',
+      maxDiffPixels: 2500,
+      maxDiffPixelRatio: 0.02,
+    },
+  },
   use: {
     baseURL,
+    locale: 'en-US',
+    timezoneId: 'UTC',
+    colorScheme: 'light',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    viewport: { width: 1280, height: 720 },
   },
   projects: [
     {

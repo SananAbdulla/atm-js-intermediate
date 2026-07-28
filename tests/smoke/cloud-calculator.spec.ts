@@ -2,7 +2,7 @@ import { test, expect } from '../fixtures/calculator.fixture';
 
 test.describe('Cloud Calculator', () => {
   test('should display the pricing calculator page', async ({ page, calculatorPage }) => {
-    await expect(page).toHaveURL(/\/products\/calculator$/);
+    await expect(page).toHaveURL(/\/products\/calculator(\?hl=en)?$/);
     await expect(calculatorPage.pageHeading()).toBeVisible();
     await expect(calculatorPage.addEstimateButton()).toBeVisible();
   });

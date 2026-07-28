@@ -3,7 +3,7 @@ import { BasePage } from './BasePage';
 
 export class CalculatorPage extends BasePage {
   constructor(page: Page) {
-    super(page, '/products/calculator');
+    super(page, '/products/calculator?hl=en');
   }
 
   cookieAcceptButton(): Locator {
@@ -94,6 +94,30 @@ export class CalculatorPage extends BasePage {
     });
   }
 
+  getStartedSection(): Locator {
+    return this.page
+      .getByRole('heading', { name: 'Get started with your estimate' })
+      .locator('xpath=ancestor::div[1]');
+  }
+
+  serviceSelectionPanel(): Locator {
+    return this.page
+      .getByRole('heading', { name: 'Add to this estimate' })
+      .locator('xpath=ancestor::div[.//h2[normalize-space()="Compute Engine"]][1]');
+  }
+
+  instancesConfigurationPanel(): Locator {
+    return this.page
+      .getByRole('heading', { name: /Instances configuration/i })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]');
+  }
+
+  instancesCountSection(): Locator {
+    return this.page
+      .getByText('Number of instances*', { exact: true })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]');
+  }
+
   header(): Locator {
     return this.page.locator('header');
   }
@@ -133,6 +157,11 @@ export class CalculatorPage extends BasePage {
     await this.computeEngineOption().click();
   }
 
+  async openInstanceConfiguration(): Promise<void> {
+    await this.viewDetailsButton().click();
+    await this.configurationBlock().waitFor({ state: 'visible' });
+  }
+
   async closeAddEstimateDialog(): Promise<void> {
     await this.page.keyboard.press('Escape');
     await this.addEstimationDialogHeading().waitFor({ state: 'hidden' });
@@ -167,6 +196,57 @@ export class CalculatorPage extends BasePage {
   async getMonthlyCostText(): Promise<string> {
     const text = await this.monthlyCost().textContent();
     return text?.trim() ?? '';
+  }
+
+  priceLabels(): Locator {
+    return this.page.getByText(/\$\d+[\d,]*\.\d{2}/);
+  }
+
+  chatConfigureButton(): Locator {
+    return this.page.getByRole('button', { name: /Chat to configure/i });
+  }
+
+  async prepareForScreenshot(): Promise<void> {
+    await this.dismissCookieBanner();
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.evaluate(async () => {
+      await document.fonts.ready;
+
+      await Promise.all(
+        [...document.images].map((image) => {
+          if (image.complete) {
+            return Promise.resolve();
+          }
+
+          return new Promise<void>((resolve) => {
+            image.addEventListener('load', () => resolve(), { once: true });
+            image.addEventListener('error', () => resolve(), { once: true });
+          });
+        }),
+      );
+    });
+
+    await this.page.addStyleTag({
+      content: `
+        *, *::before, *::after {
+          animation: none !important;
+          animation-duration: 0s !important;
+          transition: none !important;
+          transition-duration: 0s !important;
+          caret-color: transparent !important;
+        }
+      `,
+    });
+  }
+
+  screenshotMasks(): Locator[] {
+    return [this.priceLabels(), this.chatConfigureButton(), this.monthlyCost()];
+  }
+
+  async prepareComputeEngineSectionScreenshot(section: Locator): Promise<void> {
+    await this.waitForStableMonthlyCost();
+    await this.prepareForScreenshot();
+    await section.scrollIntoViewIfNeeded();
   }
 
   parseMonthlyCost(costText: string): number {
