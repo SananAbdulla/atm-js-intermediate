@@ -112,6 +112,12 @@ export class CalculatorPage extends BasePage {
       .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]');
   }
 
+  instancesCountSection(): Locator {
+    return this.page
+      .getByText('Number of instances*', { exact: true })
+      .locator('xpath=ancestor::div[.//button[@aria-label="Increment"]][1]');
+  }
+
   header(): Locator {
     return this.page.locator('header');
   }
@@ -237,29 +243,10 @@ export class CalculatorPage extends BasePage {
     return [this.priceLabels(), this.chatConfigureButton(), this.monthlyCost()];
   }
 
-  computeEngineScreenshotMasks(): Locator[] {
-    return [
-      ...this.screenshotMasks(),
-      this.seriesCombobox(),
-      this.machineTypeCombobox(),
-      this.operatingSystemCombobox(),
-      this.regionCombobox(),
-      this.instanceCountInput(),
-      this.bootDiskSizeInput(),
-      this.page.getByRole('radiogroup', { name: /Provisioning Model/i }),
-      this.page.getByText(/Based on your selections/i).locator('xpath=ancestor::div[1]'),
-    ];
-  }
-
-  async prepareComputeEngineConfigurationScreenshot(): Promise<void> {
+  async prepareComputeEngineSectionScreenshot(section: Locator): Promise<void> {
     await this.waitForStableMonthlyCost();
     await this.prepareForScreenshot();
-    const panel = this.instancesConfigurationPanel();
-    await panel.scrollIntoViewIfNeeded();
-    await panel.evaluate((element) => {
-      element.scrollTop = 0;
-      element.scrollIntoView({ block: 'start' });
-    });
+    await section.scrollIntoViewIfNeeded();
   }
 
   parseMonthlyCost(costText: string): number {
