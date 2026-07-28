@@ -45,6 +45,16 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: '**/mobile/**',
+    },
+    {
+      name: 'iPhone 15 Pro',
+      use: { ...devices['iPhone 15 Pro'] },
+    },
+    {
+      name: 'iPad Pro',
+      use: { ...devices['iPad Pro 11'] },
+      testIgnore: '**/mobile/**',
     },
   ],
 });

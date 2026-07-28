@@ -67,6 +67,29 @@ export class CalculatorPage extends BasePage {
     });
   }
 
+  mobileMenuButton(): Locator {
+    return this.page.getByRole('button', { name: 'menu' });
+  }
+
+  mobileNavigationPanel(): Locator {
+    return this.page.getByRole('banner').getByRole('link', { name: 'Overview' });
+  }
+
+  async isMobileLayout(): Promise<boolean> {
+    return this.mobileMenuButton().isVisible();
+  }
+
+  async openMobileMenu(): Promise<void> {
+    if (await this.isMobileLayout()) {
+      await this.mobileMenuButton().click();
+      await this.mobileNavigationPanel().waitFor({ state: 'visible' });
+    }
+  }
+
+  async prepareMobileView(): Promise<void> {
+    await this.pageHeading().waitFor({ state: 'visible' });
+  }
+
   async openAddEstimateDialog(): Promise<void> {
     await this.addEstimateButton().click();
     await this.addEstimationModalWindow().waitFor({ state: 'visible' });
