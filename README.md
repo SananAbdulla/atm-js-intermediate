@@ -45,10 +45,17 @@ Run a single suite:
 
 ```bash
 npx playwright test tests/smoke
-npx playwright test tests/mobile --project="iPhone 15 Pro"
+npx playwright test --project="iPhone 15 Pro"
+npx playwright test --project="iPad Pro"
 ```
 
-Mobile and tablet projects use WebKit device profiles (`iPhone 15 Pro`, `iPad Pro 11`).
+Device projects:
+
+| Project | Browser profile | Suites |
+|---------|-----------------|--------|
+| `chromium` | Desktop Chrome | smoke, e2e, integration, localization (excludes `tests/mobile`) |
+| `iPhone 15 Pro` | WebKit phone | smoke, e2e, mobile |
+| `iPad Pro` | WebKit tablet | smoke, e2e |
 
 ## Linting and formatting
 

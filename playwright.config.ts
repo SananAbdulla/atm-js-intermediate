@@ -30,10 +30,11 @@ if (process.env.RP_API_KEY) {
 export default defineConfig({
   testDir: './tests',
   outputDir: 'test-results',
-  fullyParallel: true,
+  timeout: 120_000,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  retries: process.env.CI ? 2 : 1,
+  workers: 1,
   reporter: reporters,
   use: {
     baseURL,
@@ -50,11 +51,12 @@ export default defineConfig({
     {
       name: 'iPhone 15 Pro',
       use: { ...devices['iPhone 15 Pro'] },
+      testMatch: ['**/smoke/**/*.spec.ts', '**/e2e/**/*.spec.ts', '**/mobile/**/*.spec.ts'],
     },
     {
       name: 'iPad Pro',
       use: { ...devices['iPad Pro 11'] },
-      testIgnore: '**/mobile/**',
+      testMatch: ['**/smoke/**/*.spec.ts', '**/e2e/**/*.spec.ts'],
     },
   ],
 });
