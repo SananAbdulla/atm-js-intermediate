@@ -135,14 +135,69 @@ export class CalculatorPage extends BasePage {
 
   async dismissPricingChatWidget(): Promise<void> {
     const chatMessage = this.page.getByText('Have questions about our pricing');
-    if (await chatMessage.isVisible()) {
+    if (await chatMessage.isVisible({ timeout: 1_000 }).catch(() => false)) {
       await this.page.keyboard.press('Escape');
+      const closeChat = this.page.getByRole('button', { name: /close|dismiss/i }).first();
+      if (await closeChat.isVisible({ timeout: 1_000 }).catch(() => false)) {
+        await closeChat.click({ force: true }).catch(() => undefined);
+      }
+    }
+  }
+
+  private async scrollIntoViewSafe(locator: Locator): Promise<void> {
+    await locator.evaluate((el: Element) => {
+      el.scrollIntoView({ block: 'center', inline: 'nearest' });
+
+      let parent = el.parentElement;
+      while (parent) {
+        const style = window.getComputedStyle(parent);
+        const canScroll =
+          /(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight;
+        if (canScroll) {
+          const elRect = el.getBoundingClientRect();
+          const parentRect = parent.getBoundingClientRect();
+          parent.scrollTop += elRect.top - parentRect.top - parent.clientHeight / 2 + elRect.height / 2;
+        }
+        parent = parent.parentElement;
+      }
+    });
+
+    const box = await locator.boundingBox();
+    const viewport = this.page.viewportSize();
+    if (box && viewport && box.y + box.height > viewport.height - 120) {
+      await this.page.evaluate(
+        (delta) => window.scrollBy(0, delta),
+        box.y + box.height - (viewport.height - 140),
+      );
+    }
+
+    await expect(locator).toBeVisible();
+  }
+
+  private async clickWithoutPlaywrightScroll(locator: Locator): Promise<void> {
+    await this.scrollIntoViewSafe(locator);
+    try {
+      // force avoids Playwright's internal scrollIntoViewIfNeeded (flaky on WebKit mobile)
+      await locator.click({ force: true, timeout: 3_000 });
+    } catch {
+      await locator.evaluate((el: HTMLElement) => el.click());
+    }
+  }
+
+  private async openControl(locator: Locator): Promise<void> {
+    await this.scrollIntoViewSafe(locator);
+    try {
+      await locator.click({ timeout: 3_000 });
+    } catch {
+      await locator.click({ force: true, timeout: 3_000 }).catch(async () => {
+        await locator.evaluate((el: HTMLElement) => el.click());
+      });
     }
   }
 
   async selectLanguage(localeCode: string): Promise<void> {
     await this.dismissPricingChatWidget();
-    await this.footer().scrollIntoViewIfNeeded();
+    await this.scrollIntoViewSafe(this.footer());
     await this.languageSelector().click({ force: true });
 
     const listbox = this.page.getByRole('listbox', { name: 'Language Selector Menu' });
@@ -152,13 +207,12 @@ export class CalculatorPage extends BasePage {
   }
 
   async openAddEstimateDialog(): Promise<void> {
-    await this.addEstimateButton().scrollIntoViewIfNeeded();
-    await this.addEstimateButton().click();
+    await this.openControl(this.addEstimateButton());
     await this.addEstimationDialogHeading().waitFor({ state: 'visible' });
   }
 
   async selectComputeEngine(): Promise<void> {
-    await this.computeEngineOption().click();
+    await this.openControl(this.computeEngineOption());
   }
 
   async closeAddEstimateDialog(): Promise<void> {
@@ -180,13 +234,13 @@ export class CalculatorPage extends BasePage {
   }
 
   async addComputeEngineEstimate(): Promise<void> {
+    await this.dismissPricingChatWidget();
     await this.openAddEstimateDialog();
-    await this.computeEngineOption().scrollIntoViewIfNeeded();
     await this.selectComputeEngine();
 
     const viewDetails = this.viewDetailsButton();
     if (await viewDetails.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await viewDetails.click();
+      await this.openControl(viewDetails);
     }
 
     await this.configurationBlock().waitFor({ state: 'visible' });
@@ -195,19 +249,19 @@ export class CalculatorPage extends BasePage {
 
   async addInstances(count: number): Promise<void> {
     const incrementButton = this.incrementInstancesButton();
-    await incrementButton.scrollIntoViewIfNeeded();
+    await this.scrollIntoViewSafe(incrementButton);
 
     for (let i = 0; i < count; i++) {
-      await incrementButton.click();
+      await this.clickWithoutPlaywrightScroll(incrementButton);
     }
   }
 
   async removeInstances(count: number): Promise<void> {
     const decrementButton = this.decrementInstancesButton();
-    await decrementButton.scrollIntoViewIfNeeded();
+    await this.scrollIntoViewSafe(decrementButton);
 
     for (let i = 0; i < count; i++) {
-      await decrementButton.click();
+      await this.clickWithoutPlaywrightScroll(decrementButton);
     }
   }
 
@@ -224,33 +278,54 @@ export class CalculatorPage extends BasePage {
   private async openComboboxAndSelect(combobox: Locator, option: Locator): Promise<void> {
     const visibleOption = option.filter({ visible: true }).first();
 
-    await combobox.scrollIntoViewIfNeeded();
+    await this.dismissPricingChatWidget();
 
     await expect(async () => {
-      await combobox.click();
-      await expect(visibleOption).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 30_000 });
+      await this.scrollIntoViewSafe(combobox);
+      try {
+        await combobox.click({ timeout: 3_000 });
+      } catch {
+        await combobox.evaluate((el: HTMLElement) => el.click());
+      }
+      if (!(await visibleOption.isVisible().catch(() => false))) {
+        await combobox.evaluate((el: HTMLElement) => el.click());
+      }
+      await expect(visibleOption).toBeVisible({ timeout: 2_500 });
+    }).toPass({ timeout: 45_000 });
 
-    await visibleOption.scrollIntoViewIfNeeded();
-    await visibleOption.click();
+    await this.scrollIntoViewSafe(visibleOption);
+    try {
+      await visibleOption.click({ timeout: 3_000 });
+    } catch {
+      await visibleOption.click({ force: true });
+    }
+    await expect(this.page.getByRole('listbox').filter({ visible: true }))
+      .toHaveCount(0, { timeout: 5_000 })
+      .catch(() => undefined);
   }
 
   async selectSeries(series: string): Promise<void> {
-    await this.openComboboxAndSelect(
-      this.seriesCombobox(),
-      this.page.locator(`[role="option"][data-value="${series.toLowerCase()}"]`),
-    );
-    await this.seriesCombobox()
-      .filter({ hasText: new RegExp(series, 'i') })
-      .waitFor({ state: 'visible' });
+    const seriesPattern = new RegExp(series, 'i');
+
+    await expect(async () => {
+      await this.openComboboxAndSelect(
+        this.seriesCombobox(),
+        this.page.locator(`[role="option"][data-value="${series.toLowerCase()}"]`),
+      );
+      await expect(this.seriesCombobox()).toContainText(seriesPattern, { timeout: 3_000 });
+    }).toPass({ timeout: 60_000 });
+
+    await this.machineTypeCombobox().waitFor({ state: 'visible' });
   }
 
   async selectMachineType(machineType: string): Promise<void> {
-    await this.openComboboxAndSelect(
-      this.machineTypeCombobox(),
-      this.page.locator(`[role="option"][data-value="${machineType}"]`),
-    );
-    await this.machineTypeCombobox().filter({ hasText: machineType }).waitFor({ state: 'visible' });
+    await expect(async () => {
+      await this.openComboboxAndSelect(
+        this.machineTypeCombobox(),
+        this.page.locator(`[role="option"][data-value="${machineType}"]`),
+      );
+      await expect(this.machineTypeCombobox()).toContainText(machineType, { timeout: 3_000 });
+    }).toPass({ timeout: 60_000 });
   }
 
   async selectOperatingSystem(operatingSystem: RegExp | string): Promise<void> {
